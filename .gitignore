@@ -52,6 +52,7 @@ rsconnect/
 *.csv
 *.txt
 *.xlsx
+*.xls
 
 # RData and RDS files
 *.RData
