@@ -575,18 +575,23 @@ IPM.params <- c(
 
 
 ## Test run
-niter <- 20000
-nburnin <- 5000
+niter <- 10
+nburnin <- 0
 nchains <- 3
 nthin <- 1
 
+#niter <- 20000
+#nburnin <- 5000
+#nchains <- 3
+#nthin <- 1
 
-#AF.IPM.varB4 <- nimbleMCMC(fox.code.varB4, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = 2, nburnin = 0, nchains = nchains, thin = 1, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
-
-AF.IPM.varB4 <- nimbleMCMC(fox.code.varB4, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
 
 
-save(AF.IPM.varB4, file = '200429_AF_IPM_VersionB4.RData')
+AF.IPM <- nimbleMCMC(fox.code.varB4, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
+AF.IPM <- nimbleMCMC(fox.code, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
+
+
+saveRDS(AF.IPM, file = 'AF_IPM.rds')
 
 
 
