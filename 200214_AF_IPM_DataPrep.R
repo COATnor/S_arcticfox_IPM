@@ -254,7 +254,7 @@ carcass2$AgeClass <- ifelse(carcass2$Tooth >= 5, 5, carcass2$Tooth)
 ## Assign the year
 # --> trapping season t1-t2 gives information about survival from t1 to t2, and will therefore be assigned to t1 (= 1997)
 str(carcass2$Trapseason)
-carcass2$Session <- as.numeric(carcass2$Trapseason) - 1
+carcass2$Session <- as.numeric(as.factor(carcass2$Trapseason)) - 1
 
 ## Data availability
 table(carcass2$Core_area, carcass2$Sex, useNA = 'always')
@@ -282,7 +282,7 @@ plac_scar <- subset(carcass2, !is.na(Placental_scar) & !is.na(AgeClass))
 
 ## Assign the year
 # --> placental scars from trapping season t1-t2 give information about reproduction in t1 (= 1997)
-plac_scar$Session <- as.numeric(plac_scar$Trapseason) - 1
+plac_scar$Session <- as.numeric(as.factor(plac_scar$Trapseason)) #- 1
 
 ## Assign an individual id starting at 1
 plac_scar$id <- c(1:nrow(plac_scar)) # this works, as every individual only appears once
