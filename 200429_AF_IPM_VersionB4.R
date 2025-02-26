@@ -22,7 +22,8 @@ mySeed <- 0
 ##########################
 
 ## Load workspace containing all data
-load('200228_AF_IPM_Data.RData')
+load('Data/200228_AF_IPM_Data.RData')
+IPM.data <- readRDS('AF_IPM_Data.rds')
 
 ## Data Object
 str(IPM.data)

@@ -1,5 +1,5 @@
 library(plyr)
-library(reshape)
+library(reshape2)
 
 ###############################
 #### 1) MARK-RECOVERY DATA #### 
@@ -16,7 +16,7 @@ library(reshape)
 #**************************************
 
 ## Read in data file
-fox <- read.csv('/Users/chloern/Dropbox/Arctic_Fox_SUSTAIN/Data/Tagging/200110_AF_tagging_red.csv', sep = ',')
+fox <- read.csv('Data/200110_AF_tagging_red.csv', sep = ',')
 fox <- subset(fox, !is.na(Event))
 
 ## Coding events as numbers
@@ -234,7 +234,7 @@ CMRR.data$rrCH3 <- rrCH3
 #**************************************
 
 ## Read in data file
-carcass <- read.csv('/Users/chloern/Dropbox/Arctic_Fox_SUSTAIN/Data/Carcasses_Trap/Raw_data/200108_carcass_trap.csv')
+carcass <- read.csv('Data/200108_carcass_trap.csv')
 # --> Required: Age-at-harvest matrix
 
 ## Assign age = 1 to individuals noted as juveniles or with baby teeth
@@ -269,7 +269,7 @@ dimnames(C) <- NULL
 C
 
 ## Load data on proportions of carcasses missing age/sex and location information
-load('200131_MissingDataProps.RData')
+load('Data/200131_MissingDataProps.RData')
 
 
 #############################
@@ -313,7 +313,7 @@ P2_core <- plac_scar2$Core_area
 
 CarcassLoc <- list(P1_core = P1_core, P2_core = P2_core)
 
-save(CarcassLoc, file = '200131_CarcassLocations.RData')
+saveRDS(CarcassLoc, file = 'CarcassLocations.rds')
 
 
 ###########################
@@ -326,7 +326,7 @@ save(CarcassLoc, file = '200131_CarcassLocations.RData')
 #**************************************
 
 ## Read in data file
-carcassN <- read.csv('/Users/chloern/Dropbox/Arctic_Fox_SUSTAIN/Data/Carcasses_Natural/Raw_data/200228_Carcass_natural_red.csv')
+carcassN <- read.csv('Data/200228_Carcass_natural_red.csv')
 # --> Required: Age-at-death matrix
 
 ## Assign age = 1 to individuals noted as pups, juveniles or with baby teeth
@@ -392,7 +392,7 @@ M
 #**************************************
 
 ## Read in data file
-denS <- read.csv('/Users/chloern/Dropbox/Arctic_Fox_SUSTAIN/Data/Den_Survey/200214_DenSurvey.csv', check.names = FALSE)
+denS <- read.csv('Data/200214_DenSurvey.csv', check.names = FALSE)
 
 ## Remove non-core area and secondary dens
 denS <- subset(denS, CoreArea == 1 & MainDen == 1)
@@ -428,7 +428,7 @@ denS_pups$time <- as.numeric(as.character(denS_pups$Year)) - 1996
 SessionYears <- cbind(Index = c(1:22), Interval = paste(c(1997:2018),'(Jun)-',c(1998:2019), '(May)', sep = ''), Census = paste(c(1997:2018),'(Jun)', sep = ''))
 
 ## Load environmental data
-load('200207_EnvCov_forIPM.RData')
+load('Data/200207_EnvCov_forIPM.RData')
 
 
 ## Organize all data into a single list
@@ -484,6 +484,6 @@ IPM.data <- list(
   SpringAO = envCov$SpringAO.sc)
 
 
-save(IPM.data, file = '200228_AF_IPM_Data.RData')
+saveRDS(IPM.data, file = 'AF_IPM_Data.rds')
 
 
