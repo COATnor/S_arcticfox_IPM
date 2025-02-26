@@ -57,3 +57,6 @@ rsconnect/
 # RData and RDS files
 *.RData
 *.rds
+
+# PDF figures
+*.pdf
