@@ -239,6 +239,7 @@ fox.code.varB4 <- nimbleCode({
     ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
     # In theory, ImmT could be negative (non-truncated normal distribution)
     # --> this may end up causing issues at some point (does not now)
+    # TODO: It causes issues now (occasionally). We should use a different distribution.
   }
   
   avgImm ~ dunif(0, 400)
@@ -575,15 +576,15 @@ IPM.params <- c(
 
 
 ## Test run
-niter <- 10
-nburnin <- 0
-nchains <- 3
-nthin <- 1
-
-#niter <- 20000
-#nburnin <- 5000
+#niter <- 10
+#nburnin <- 0
 #nchains <- 3
 #nthin <- 1
+
+niter <- 20000
+nburnin <- 5000
+nchains <- 3
+nthin <- 1
 
 
 
@@ -593,5 +594,15 @@ AF.IPM <- nimbleMCMC(fox.code, fox.constants, fox.data, initValsFull, monitors =
 
 saveRDS(AF.IPM, file = 'AF_IPM.rds')
 
+## Plot traces
+MCMCvis::MCMCtrace(AF.IPM,
+                   params = c("Mu.mH", "betaHP.mH", "sigma.mH", 
+                              "Mu.mO", "betaY.mO", "betaRC.mO", "betaG.mO", "betaSI.mO", "sigma.mO",  
+                              "S0", "betaRC.m0", "betaSI.m0", "betaY.m0", "sigma.m0", 
+                              "mean.rho", "a.eff1", "betaRC.rho", "betaSI.rho", "betaY.rho", "sigma.rho", 
+                              "par.a", "par.b", "par.c", "betaY.Psi", "betaRC.Psi", "betaSI.Psi", "sigma.Psi", 
+                              #"N.tot", "R.tot", "B.tot", "meanLS", 
+                              "avgImm", "sigma.Imm", #"Imm",
+                              "u.Dens"))
 
 
