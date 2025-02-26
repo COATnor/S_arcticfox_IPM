@@ -3,18 +3,19 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 
 ## Load workspace containing all data
-load('200228_AF_IPM_Data.RData')
-
+#load('200228_AF_IPM_Data.RData')
+IPM.data <- readRDS("AF_IPM_Data.rds") 
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+# load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 ls()
 
 ## Re-arrange data
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 data <- melt(out.mat)
 colnames(data) <- c('index', 'parameter', 'value')
 
@@ -82,7 +83,7 @@ DD.posthocTest <- function(MCMC.mat, Tmax, RepAgeClass, i){ # i = sample number
 DDtest <- do.call("rbind", sapply(1:nrow(out.mat), FUN = function(i) DD.posthocTest(out.mat, 23, 3, i), simplify = FALSE))
 
 ## Save results
-save(DDtest, file = '200503_DDtest_Results_Cor.RData')
+saveRDS(DDtest, file = 'DDtest_Results_Cor.rds')
 
 ## Extract quantiles
 quantile(DDtest$beta_Ntot.lambda, probs = c(0.05, 0.5, 0.95))
@@ -139,3 +140,5 @@ quantile(DDtest$beta_Nad.rho, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
 
 quantile(DDtest$beta_Nad.m0, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
 # --> All CI's overlap 0
+
+# --> Functionality confirmed. 

@@ -3,18 +3,19 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(viridis)
 library(plyr)
 library(gridExtra)
 
 ## Load workspace containing all data
-load('200228_AF_IPM_Data.RData')
-
+#load('200228_AF_IPM_Data.RData')
+IPM.data <- readRDS("AF_IPM_Data.rds") 
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+# load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 ls()
 
 ## Re-arrange data
@@ -175,7 +176,7 @@ m0.data$Parameter <- 'Denning mortality'
 results <- rbind(mOj.data, mOa.data, Psi.data, rho.data, m0.data)
 
 ## Save results
-save(results, file = '200503_VarianceDecomposition.RData')
+saveRDS(results, file = 'VarianceDecomposition.rds')
 
 
 #--------------#
@@ -191,10 +192,10 @@ ggplot(results, aes(x = value, group = variable)) + geom_density(aes(fill = vari
 ggplot(results, aes(x = variable, y = value, group = variable)) + geom_violin(aes(fill = variable, color = variable), alpha = 0.5, scale = 'width', draw_quantiles = 0.5) + xlab('') + scale_fill_viridis(discrete = T) + scale_color_viridis(discrete = T) + facet_wrap(~Parameter, ncol = 1, scales = 'free_y') + theme_bw() + theme(legend.position = 'none', panel.grid = element_blank()) 
 
 # Half-Violins 
-ggplot(results, aes(x = variable, y = value, group = variable)) + geom_violinhalf(aes(fill = variable, color = variable), alpha = 0.5, scale = 'width', draw_quantiles = 0.5) + xlab('') + scale_fill_viridis(discrete = T) + scale_color_viridis(discrete = T) + facet_wrap(~Parameter, ncol = 1, scales = 'free_y') + theme_bw() + theme(legend.position = 'none', panel.grid = element_blank()) 
+ggplot(results, aes(x = variable, y = value, group = variable)) + see::geom_violinhalf(aes(fill = variable, color = variable), alpha = 0.5, scale = 'width', draw_quantiles = 0.5) + xlab('') + scale_fill_viridis(discrete = T) + scale_color_viridis(discrete = T) + facet_wrap(~Parameter, ncol = 1, scales = 'free_y') + theme_bw() + theme(legend.position = 'none', panel.grid = element_blank()) 
 
 # Half-Violins - flipped
-ggplot(results, aes(x = variable, y = value, group = variable)) + geom_violinhalf(aes(fill = variable, color = variable), alpha = 0.5, scale = 'width', trim = T) + xlab('') + scale_fill_viridis(discrete = T) + scale_color_viridis(discrete = T) + facet_wrap(~Parameter, nrow = 2, scales = 'free_y') + theme_bw() + theme(panel.grid = element_blank(), axis.text.y = element_blank()) + coord_flip()
+ggplot(results, aes(x = variable, y = value, group = variable)) + see::geom_violinhalf(aes(fill = variable, color = variable), alpha = 0.5, scale = 'width', trim = T) + xlab('') + scale_fill_viridis(discrete = T) + scale_color_viridis(discrete = T) + facet_wrap(~Parameter, nrow = 2, scales = 'free_y') + theme_bw() + theme(panel.grid = element_blank(), axis.text.y = element_blank()) + coord_flip()
 
 
 # --> The results here are really not very conclusive, as there is very heavy skew towards 0 for everything (except RV in pregnancy rate)
@@ -203,8 +204,8 @@ ggplot(results, aes(x = variable, y = value, group = variable)) + geom_violinhal
 ## Final plot
 results$Parameter <- factor(results$Parameter, levels = c('Juvenile natural mortality', 'Adult natural mortality', 'Denning mortality', 'Pregnancy rate', 'Fetus number'))
 
-pdf('200503_VarianceDecomposition_Violins.pdf', width = 8*0.8, height = 5*0.8)
-ggplot(results, aes(x = variable, y = value, group = variable)) + geom_violinhalf(aes(fill = variable), color = NA, scale = 'width', trim = T) + xlab('') + scale_fill_viridis(discrete = T, labels = c('Sea ice', 'Reindeer carcasses', 'Goose reproduction', 'Time trend', 'Random year effects')) + facet_wrap(~Parameter, nrow = 2, scales = 'free_y') + ylab('Proportion of variance explained') + theme_bw() + theme(panel.grid = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = c(0.8, 0.25), legend.title = element_blank()) + coord_flip() + guides(fill = guide_legend(reverse=T))
+pdf('VarianceDecomposition_Violins.pdf', width = 8*0.8, height = 5*0.8)
+ggplot(results, aes(x = variable, y = value, group = variable)) + see::geom_violinhalf(aes(fill = variable), color = NA, scale = 'width', trim = T) + xlab('') + scale_fill_viridis(discrete = T, labels = c('Sea ice', 'Reindeer carcasses', 'Goose reproduction', 'Time trend', 'Random year effects')) + facet_wrap(~Parameter, nrow = 2, scales = 'free_y') + ylab('Proportion of variance explained') + theme_bw() + theme(panel.grid = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = c(0.8, 0.25), legend.title = element_blank()) + coord_flip() + guides(fill = guide_legend(reverse=T))
 dev.off()
 
 
@@ -225,3 +226,4 @@ q_0.75 = quantile(value, probs = 0.75))
 # rho: RV > Trend > SeaIce > WinterTemp > RdCarcass
 # m0: RV > RdCarcass > Trend = SeaIce
 
+# --> Functionality confirmed. 

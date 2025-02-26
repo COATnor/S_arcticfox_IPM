@@ -3,7 +3,7 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(viridis)
 library(plyr)
@@ -12,16 +12,18 @@ library(GGally)
 library(corrplot)
 
 ## Load workspace containing data used for model fitting
-load('200228_AF_IPM_Data.RData')
+#load('200228_AF_IPM_Data.RData')
+IPM.data <- readRDS("AF_IPM_Data.rds") 
 
 ## Load additional preliminary data on harvest effort
-effData <- read.csv('200324_TrappingEffort.csv')
+effData <- read.csv('Data/200324_TrappingEffort.csv')
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+#load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 
 ## Re-arrange data
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 data <- melt(out.mat)
 colnames(data) <- c('index', 'parameter', 'value')
 
@@ -68,13 +70,13 @@ mH.data$NoTrapDays <- effData$NoTrapDays
 cor(mH.data[,c(2,5:11)], use = 'complete.obs')
 
 # Pairplot
-pdf('200503_Harvest_Correlations_Pairs.pdf', width = 8.5, height = 8)
+pdf('Harvest_Correlations_Pairs.pdf', width = 8.5, height = 8)
 ggpairs(mH.data[,c(2,5:11)], lower = list(continuous=wrap("points", color = 'blue', alpha = 0.5)),
   diag = list(continuous=wrap("barDiag", color = NA, fill = 'blue'))) + theme_bw() + theme(panel.grid = element_blank())
 dev.off()
 
 # Correlation plot (with significance)
-pdf('200503_Harvest_Correlations_Corrs.pdf', width = 8.5, height = 8)
+pdf('Harvest_Correlations_Corrs.pdf', width = 8.5, height = 8)
 corrplot(cor(mH.data[,c(2,5:11)], use = 'complete.obs'), type = 'upper', tl.col="black")
 corrplot(cor(mH.data[,c(2,5:11)], use = 'complete.obs'), sig.level = 0.05, insig = 'blank', type = 'upper', p.mat = cor.mtest(mH.data[,c(2,5:11)])$p, tl.col="black")
 dev.off()
@@ -146,3 +148,4 @@ pdf("HarvestMortality_VS_Data_2.pdf", width = 6.5, height = 5)
 grid.arrange(gA, gB, ncol=1, heights = c(1, 1.2))
 dev.off()
 
+# --> Functionality confirmed. 

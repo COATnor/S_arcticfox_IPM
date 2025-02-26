@@ -10,11 +10,12 @@ library(plyr)
 library(gridExtra)
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4_Bmonitor.RData')
+#load('200429_AF_IPM_VersionB4_Bmonitor.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 ls()
 
 ## Re-arrange data
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 data <- melt(out.mat)
 colnames(data) <- c('index', 'parameter', 'value')
 
@@ -27,12 +28,13 @@ data.sum <- ddply(data, .(parameter), summarise, median = median(value, na.rm = 
 #--------------------------------------#
 
 ## Subset data
-data.Bat <- data.sum[49:140,]
+B.params <- paste0("B[", rep(c(2:5), each = 23), ", ", rep(c(1, 10:19, 2, 20:23, 3:9), 4), "]")
+data.Bat <- subset(data.sum, parameter %in% B.params)
 
 ## Add time
-data.Bat$indexT <- rep(c(1, 10:19, 2, 20:23, 3:9), 4)
+data.Bat$indexT <- rep(c(1:23), each = 4)
 data.Bat$Year <- data.Bat$indexT+1996
-data.Bat$AgeClass <- rep(c('1', '2', '3', '4+'), each = 23)
+data.Bat$AgeClass <- rep(c('1', '2', '3', '4+'), 23)
 data.Bat <- data.Bat[order(data.Bat$Year),]
 
 p1 <- ggplot(data.Bat, aes(x = Year, y = median, group = AgeClass, color = AgeClass, fill = AgeClass)) + geom_area(position = 'stack') + ylab('Breeding population size') + scale_x_continuous(breaks = c(1997:2019)) + scale_color_manual(values = cividis(5)[2:5]) + scale_fill_manual(values = cividis(5)[2:5]) + theme_bw() + theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, vjust = 0.5))
@@ -55,5 +57,4 @@ grid::grid.newpage()
 grid::grid.draw(rbind(gA, gB))
 dev.off()
 
-
-
+# --> Functionality confirmed. 

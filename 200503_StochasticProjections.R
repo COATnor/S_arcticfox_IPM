@@ -3,7 +3,7 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(viridis)
 library(plyr)
@@ -11,9 +11,10 @@ library(gridExtra)
 
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+#load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 
 
 #-------------------------------------------#
@@ -185,3 +186,4 @@ p4 + theme(axis.title.x = element_blank(), axis.text.x = element_blank()),
 p5, ncol = 1, heights = c(1, 1, 1, 1, 1.25))
 dev.off()
 
+# --> Functionality confirmed. 

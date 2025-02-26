@@ -3,18 +3,19 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 
 ## Load workspace containing all data
-load('200228_AF_IPM_Data.RData')
-
+#load('200228_AF_IPM_Data.RData')
+IPM.data <- readRDS("AF_IPM_Data.rds") 
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+# load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 ls()
 
 ## Re-arrange data
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 data <- melt(out.mat)
 colnames(data) <- c('index', 'parameter', 'value')
 
@@ -76,7 +77,7 @@ Imm.posthocTest <- function(MCMC.mat, Tmax, RepAgeClass, i){ # i = sample number
 Immtest <- do.call("rbind", sapply(1:nrow(out.mat), FUN = function(i) Imm.posthocTest(out.mat, 23, 3, i), simplify = FALSE))
 
 ## Save results
-save(Immtest, file = '200503_Immtest_Results_Cor.RData')
+saveRDS(Immtest, file = 'Immtest_Results_Cor.rds')
 
 ## Extract quantiles
 quantile(Immtest$beta_Ntot.Imm, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
@@ -96,4 +97,4 @@ quantile(Immtest$beta_mOa.Imm, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
 # --> All 95% CI's overlap 0
 # --> 50% CI's for harvest do not include 0 and indicate a negative effect (less immigrants when more harvest is going on) -> counter to what we would expect under the population sink hypothesis
 
-
+# --> Functionality confirmed. 

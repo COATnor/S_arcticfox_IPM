@@ -132,31 +132,33 @@ quantile(mean.p5, probs = c(0.05, 0.5, 0.95), na.rm = TRUE)
 # PLOT POPULATION SIZE ~ TIME #
 #-----------------------------#
 
-## Subset data
-popN <- paste('N.tot[', c(1:23), ']', sep = '')
-data.Ntot <- subset(data.sum, parameter%in%popN)
+# ## Subset data
+# popN <- paste('N.tot[', c(1:23), ']', sep = '')
+# data.Ntot <- subset(data.sum, parameter%in%popN)
+# 
+# ## Add time
+# data.Ntot$indexT <- c(1,10:19, 2, 20:23, 3:9)
+# data.Ntot$Year <- data.Ntot$indexT+1996
+# data.Ntot <- data.Ntot[order(data.Ntot$Year),]
+# 
+# ## Add harvest data
+# data.Ntot$HarvestData <- c(colSums(IPM.data$C), NA)
+# 
+# ## Plot - Estimate with 95% CI
+# plot.Ntot <- ggplot(data.Ntot, aes(x = Year, y = median)) + geom_line(color = '#5C566B') + geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.5, fill = '#5C566B') + ylab('Total population size') + scale_x_continuous(breaks = c(1997:2019)) + theme_bw() + theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, vjust = 0.5))
+# 
+# pdf("Ntot_time.pdf", width = 6.5, height = 4)
+# plot.Ntot
+# dev.off()
+# 
+# ## Plot - Estimate with 95% CI + harvest data
+# plot.Htot <- ggplot(data.Ntot, aes(x = Year, y = HarvestData)) + geom_point(color = viridis(3)[2]) + geom_line(color = viridis(3)[2], alpha = 0.5) + ylab('# harvested') + scale_x_continuous(breaks = c(1997:2019)) + theme_bw() + theme(panel.grid.minor = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank(), panel.grid.major.y = element_blank())
+# 
+# pdf("Ntot_time_Cdata.pdf", width = 6.5, height = 5)
+# grid.arrange(plot.Htot, plot.Ntot, nrow = 2, heights = c(0.4, 1))
+# dev.off()
 
-## Add time
-data.Ntot$indexT <- c(1,10:19, 2, 20:23, 3:9)
-data.Ntot$Year <- data.Ntot$indexT+1996
-data.Ntot <- data.Ntot[order(data.Ntot$Year),]
-
-## Add harvest data
-data.Ntot$HarvestData <- c(colSums(IPM.data$C), NA)
-
-## Plot - Estimate with 95% CI
-plot.Ntot <- ggplot(data.Ntot, aes(x = Year, y = median)) + geom_line(color = '#5C566B') + geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.5, fill = '#5C566B') + ylab('Total population size') + scale_x_continuous(breaks = c(1997:2019)) + theme_bw() + theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, vjust = 0.5))
-
-pdf("Ntot_time.pdf", width = 6.5, height = 4)
-plot.Ntot
-dev.off()
-
-## Plot - Estimate with 95% CI + harvest data
-plot.Htot <- ggplot(data.Ntot, aes(x = Year, y = HarvestData)) + geom_point(color = viridis(3)[2]) + geom_line(color = viridis(3)[2], alpha = 0.5) + ylab('# harvested') + scale_x_continuous(breaks = c(1997:2019)) + theme_bw() + theme(panel.grid.minor = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank(), panel.grid.major.y = element_blank())
-
-pdf("Ntot_time_Cdata.pdf", width = 6.5, height = 5)
-grid.arrange(plot.Htot, plot.Ntot, nrow = 2, heights = c(0.4, 1))
-dev.off()
+# NOTE: Use revised version from 210117_ModelPred_Plots_RevUpdate.R
 
 
 #-----------------------------#

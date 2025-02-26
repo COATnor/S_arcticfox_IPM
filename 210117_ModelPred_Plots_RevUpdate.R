@@ -3,22 +3,23 @@
 #############################################################
 
 library(coda)
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(viridis)
 library(plyr)
 library(gridExtra)
 
 ## Load workspace containing all data
-load('200228_AF_IPM_Data.RData')
-
+#load('200228_AF_IPM_Data.RData')
+IPM.data <- readRDS("AF_IPM_Data.rds") 
 
 ## Load posterior samples
-load('200429_AF_IPM_VersionB4.RData')
+# load('200429_AF_IPM_VersionB4.RData')
+AF.IPM <- readRDS("AF_IPM.rds")
 ls()
 
 ## Re-arrange data
-out.mat <- as.matrix(AF.IPM.varB4)
+out.mat <- as.matrix(AF.IPM)
 data <- melt(out.mat)
 colnames(data) <- c('index', 'parameter', 'value')
 
@@ -42,7 +43,7 @@ data.Ntot <- data.Ntot[order(data.Ntot$Year),]
 data.Ntot$HarvestData <- c(colSums(IPM.data$C), NA)
 
 ## Plot - Estimate with 95% CI
-axis <- scale_x_continuous(breaks = c(1997:2019) + limits = range(data.Ntot$Year))
+axis <- scale_x_continuous(breaks = c(1997:2019), limits = range(data.Ntot$Year))
 
 plot.Ntot <- ggplot(data.Ntot, aes(x = Year, y = median)) + 
               geom_line(color = '#5C566B') + 
@@ -62,7 +63,7 @@ plot.Htot <- ggplot(data.Ntot, aes(x = Year, y = HarvestData)) +
               theme_bw() + theme(panel.grid.minor = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank(), panel.grid.major.y = element_blank())
 #plot.Htot
 
-aligned <- align_plots(plot.Htot, plot.Ntot, align = "v", axis = 'b')
+aligned <- cowplot::align_plots(plot.Htot, plot.Ntot, align = "v", axis = 'b')
 grid.arrange(aligned[[1]], aligned[[2]], nrow = 2, heights = c(0.4, 1))
 
 
@@ -80,7 +81,7 @@ popR <- paste('R.tot[', c(1:23), ']', sep = '')
 data.Rtot <- subset(data.sum, parameter%in%c(popR))
 
 ## Add time
-data.Rtot$indexT <- c(1, 10:19, 2, 20:23, 3:9)
+data.Rtot$indexT <- c(1:23)
 data.Rtot$Year <- data.Rtot$indexT+1996
 data.Rtot <- data.Rtot[order(data.Rtot$Year),]
 
@@ -99,7 +100,7 @@ popImm <- paste('Imm[', c(2:23), ']', sep = '')
 data.Imm <- subset(data.sum, parameter%in%popImm)
 
 ## Add time
-data.Imm$indexT <- c(10:19, 2, 20:23, 3:9)
+data.Imm$indexT <- c(2:23)
 data.Imm$Year <- data.Imm$indexT+1996
 data.Imm <- data.Imm[order(data.Imm$Year),]
 
@@ -118,3 +119,5 @@ ggplot(data.Imm, aes(x = Year, y = median, group = Origin, color = Origin, fill 
   scale_color_manual(values = viridis(5)[c(4,2)]) + scale_fill_manual(values = viridis(5)[c(4,2)]) + 
   theme_bw() + theme(panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, vjust = 0.5))
 dev.off()
+
+# --> Functionality confirmed. 
