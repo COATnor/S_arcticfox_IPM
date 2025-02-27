@@ -99,7 +99,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
                   Age = ifelse(AgeIdx == Amax, paste0(Amax-1, "+"), AgeIdx-1),
                   ParamName = stringr::word(Parameter, 1, sep = "\\[")) %>%
     
-    dplyr::mutate(Age = dplyr::case_when(!(ParamName %in% c("Mu.mH", "Mu.mO")) ~ Age,
+    dplyr::mutate(Age = dplyr::case_when(!(ParamName %in% c("Mu.mH", "Mu.mO", "mH", "mO")) ~ Age,
                                          AgeIdx == 1 ~ "Adult",
                                          AgeIdx == 2 ~ "Juvenile"))
     
@@ -143,7 +143,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   )
 
   plotTS.params <- list(
-    ParamNames = c("N.tot", "B.tot", "R.tot", "Imm", "m0t"),
+    ParamNames = c("N.tot", "B.tot", "R.tot", "m0t", "Imm"),
     ParamLabels = c("Female population size", "# breeding females", "# female recruits", 
                     "Denning mortality", "# female immigrants")
   )
