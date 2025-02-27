@@ -1,11 +1,11 @@
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(ggridges)
 library(viridis)
 library(patchwork)
 
 ## Load LTRE results
-load('200503_AF_LTRE_Random.RData')
+load('AF_LTRE_Random.RData')
 
 str(elas.data) 
 
@@ -82,3 +82,4 @@ pdf('Elasticity_Violins.pdf', width = 8.27, height = 11.69)
 p.summary / (p.m | p.Psi) / (p.rho | p.N)
 dev.off()
 
+# --> Functionality confirmed. 

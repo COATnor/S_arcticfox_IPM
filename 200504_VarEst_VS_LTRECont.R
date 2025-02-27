@@ -1,8 +1,8 @@
-library(reshape)
+library(reshape2)
 library(plyr)
 
 ## Load LTRE results
-load('200503_AF_LTRE_Random.RData')
+load('AF_LTRE_Random.RData')
 
 str(LTRE.H.data) # LTRE with contributions of mortality hazard rates
 str(est_var)
@@ -26,4 +26,6 @@ results <- data.frame(
 )
 
 ## Save results
-write.csv(results, '200504_VarEst_VS_LTRECont.csv', row.names = F)
+write.csv(results, 'VarEst_VS_LTRECont.csv', row.names = F)
+
+# --> Functionality confirmed. 

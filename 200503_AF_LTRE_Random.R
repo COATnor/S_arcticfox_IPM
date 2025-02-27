@@ -1,16 +1,21 @@
 library(coda)
 library(matrixStats)
 library(reshape2)
+library(ggplot2)
 
 ## Load MCMC samples
-#load('ArcticFox_IPM_PosteriorSamples.RData')
-MCMCsamples <- readRDS("AF_IPM_logImm.rds")
+load("Data/ArcticFox_IPM_PosteriorSamples.RData")
 str(MCMCsamples)
-# = posterior samples in coda format
 
 ## Transform samples into matrix (all chains combined)
 out.mat <- as.matrix(MCMCsamples)
 str(out.mat)
+
+## Take a subset of samples for testing
+#out.mat <- out.mat[1:10,]
+
+#sample.index <- seq(1, dim(out.mat)[1], by = 32)
+#out.mat <- out.mat[sample.index,]
 
 ## Set sample and year number
 nosamples <- dim(out.mat)[1]
@@ -43,7 +48,7 @@ lambda <- matrix(NA, nrow = nosamples, ncol = noyears)
 Imm <- matrix(NA, nrow = nosamples, ncol = noyears)
 
 
-## Fill posterior samples into vectors and matrices
+## Fill samples into vectors and matrices
 for(i in 1:nosamples){
   
   for(t in 1:noyears){
@@ -226,6 +231,53 @@ for(i in 1:nosamples){
 }
 
 
+## Get posterior summaries for transient sensitivities
+quantile(sens_Sj, probs = c(0.05, 0.5, 0.95))
+quantile(sens_mHj, probs = c(0.05, 0.5, 0.95))
+quantile(sens_mOj, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_Sa, probs = c(0.05, 0.5, 0.95))
+quantile(sens_mHa, probs = c(0.05, 0.5, 0.95))
+quantile(sens_mOa, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_S0, probs = c(0.05, 0.5, 0.95))
+quantile(sens_m0, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_Psi2, probs = c(0.05, 0.5, 0.95))
+quantile(sens_Psi3, probs = c(0.05, 0.5, 0.95))
+quantile(sens_Psi4, probs = c(0.05, 0.5, 0.95))
+quantile(sens_Psi5, probs = c(0.05, 0.5, 0.95))
+quantile(sens_Psi2+sens_Psi3+sens_Psi4+sens_Psi5, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_rho2, probs = c(0.05, 0.5, 0.95))
+quantile(sens_rho3, probs = c(0.05, 0.5, 0.95))
+quantile(sens_rho4, probs = c(0.05, 0.5, 0.95))
+quantile(sens_rho5, probs = c(0.05, 0.5, 0.95))
+quantile(sens_rho2+sens_rho3+sens_rho4+sens_rho5, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_N_1, probs = c(0.05, 0.5, 0.95))
+quantile(sens_N_2, probs = c(0.05, 0.5, 0.95))
+quantile(sens_N_3, probs = c(0.05, 0.5, 0.95))
+quantile(sens_N_4, probs = c(0.05, 0.5, 0.95))
+quantile(sens_N_5, probs = c(0.05, 0.5, 0.95))
+
+quantile(sens_Imm, probs = c(0.05, 0.5, 0.95))
+
+## Plot sensitivities
+sens.all <- cbind(sens_Sj, sens_mHj, sens_mOj, 
+				  sens_Sa, sens_mHa, sens_mOa, 
+				  sens_S0, sens_m0, 
+				  sens_Psi2, sens_Psi3, sens_Psi4, sens_Psi5,
+				  sens_rho2, sens_rho3, sens_rho4, sens_rho4,
+				  sens_N_1, sens_N_2, sens_N_3, sens_N_4, sens_N_5,
+				  sens_Imm)
+
+sens.data <- melt(as.data.frame(sens.all))
+
+ggplot(subset(sens.data, value != 0), aes(x = variable, y = value, group = variable)) + geom_boxplot()
+ggplot(subset(sens.data, value != 0), aes(x = variable, y = abs(value), group = variable)) + geom_boxplot()
+
+
 ###############################################
 #### CALCULATION OF TRANSIENT ELASTICITIES ####
 ###############################################
@@ -260,6 +312,196 @@ elas_N_4 <- sens_N_4*(N_4_mean/lambda_mean)
 elas_N_5 <- sens_N_5*(N_5_mean/lambda_mean)
 
 elas_Imm <- sens_Imm*(Imm_mean/lambda_mean)
+
+
+## Get posterior summaries for transient elasticities
+quantile(elas_Sj, probs = c(0.05, 0.5, 0.95))
+quantile(elas_mHj, probs = c(0.05, 0.5, 0.95))
+quantile(elas_mOj, probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_Sa, probs = c(0.05, 0.5, 0.95))
+quantile(elas_mHa, probs = c(0.05, 0.5, 0.95))
+quantile(elas_mOa, probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_S0, probs = c(0.05, 0.5, 0.95))
+quantile(elas_m0, probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_Psi2, probs = c(0.05, 0.5, 0.95))
+quantile(elas_Psi3, probs = c(0.05, 0.5, 0.95))
+quantile(elas_Psi4, probs = c(0.05, 0.5, 0.95))
+quantile(elas_Psi5, probs = c(0.05, 0.5, 0.95))
+quantile(sum(elas_Psi2, elas_Psi3, elas_Psi4, elas_Psi5), probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_rho2, probs = c(0.05, 0.5, 0.95))
+quantile(elas_rho3, probs = c(0.05, 0.5, 0.95))
+quantile(elas_rho4, probs = c(0.05, 0.5, 0.95))
+quantile(elas_rho5, probs = c(0.05, 0.5, 0.95))
+quantile(sum(elas_rho2, elas_rho3, elas_rho4, elas_rho5), probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_N_1, probs = c(0.05, 0.5, 0.95))
+quantile(elas_N_2, probs = c(0.05, 0.5, 0.95))
+quantile(elas_N_3, probs = c(0.05, 0.5, 0.95))
+quantile(elas_N_4, probs = c(0.05, 0.5, 0.95))
+quantile(elas_N_5, probs = c(0.05, 0.5, 0.95))
+
+quantile(elas_Imm, probs = c(0.05, 0.5, 0.95))
+
+## Plot elasticities
+elas.all <- cbind(elas_Sj, elas_mHj, elas_mOj, 
+                  elas_Sa, elas_mHa, elas_mOa, 
+                  elas_S0, elas_m0, 
+                  elas_Psi2, elas_Psi3, elas_Psi4, elas_Psi5,
+                  elas_rho2, elas_rho3, elas_rho4, elas_rho5,
+                  elas_N_1, elas_N_2, elas_N_3, elas_N_4, elas_N_5,
+                  elas_Imm)
+
+elas.data <- melt(as.data.frame(elas.all))
+
+ggplot(subset(elas.data, value != 0), aes(x = variable, y = value, group = variable)) + geom_boxplot()
+ggplot(subset(elas.data, value != 0), aes(x = variable, y = abs(value), group = variable)) + geom_boxplot()
+
+###############################################################
+#### CALCULATE LTRE CONTRIBUTIONS - SURVIVAL PROBABILITIES ####
+###############################################################
+
+## Prepare vectors to store results
+cont_Sj <- rep(NA, nosamples)
+
+cont_Sa <- rep(NA, nosamples)
+
+cont_S0 <- rep(NA, nosamples)
+
+cont_Psi2 <- rep(NA, nosamples)
+cont_Psi3 <- rep(NA, nosamples)
+cont_Psi4 <- rep(NA, nosamples)
+cont_Psi5 <- rep(NA, nosamples)
+
+cont_rho2 <- rep(NA, nosamples)
+cont_rho3 <- rep(NA, nosamples)
+cont_rho4 <- rep(NA, nosamples)
+cont_rho5 <- rep(NA, nosamples)
+
+cont_N_1 <- rep(NA, nosamples)
+cont_N_2 <- rep(NA, nosamples)
+cont_N_3 <- rep(NA, nosamples)
+cont_N_4 <- rep(NA, nosamples)
+cont_N_5 <- rep(NA, nosamples)
+
+cont_Imm <- rep(NA, nosamples)
+
+est_var <- matrix(NA, nrow = 17, ncol = nosamples)
+est_covar <- matrix(NA, nrow = 17, ncol = nosamples)
+
+
+## Calculate LTRE contributions (random design LTRE)
+
+for(i in 1:nosamples){
+  
+  ## Make matrix of vital rates and population sizes
+  dp_stoch <- cbind(Sj[i,1:(noyears-1)],
+					Sa[i,1:(noyears-1)],
+  					S0[i,2:noyears],
+  					Psi2[i,2:noyears],
+  					Psi3[i,2:noyears],
+  					Psi4[i,2:noyears],
+  					Psi5[i,2:noyears],
+  					rho2[i,2:noyears],
+  					rho3[i,2:noyears],
+  					rho4[i,2:noyears],
+  					Psi5[i,2:noyears],
+                    N_1[i,1:(noyears-1)],
+                    N_2[i,1:(noyears-1)],
+                    N_3[i,1:(noyears-1)],
+                    N_4[i,1:(noyears-1)],
+                    N_5[i,1:(noyears-1)],
+                    Imm[i,2:noyears]
+                    )
+  
+  ## Derive process variances and covariances
+  dp_varcov <- var(dp_stoch)
+  
+  ## Save total estimated (co)variance per parameter
+  est_var[,i] <- diag(dp_varcov)
+  est_covar[,i] <- rowSums(dp_varcov)
+  
+  ## Make a vector of sensitivities
+  sensvec <- c(	sens_Sj[i],
+				sens_Sa[i],
+				sens_S0[i],
+				sens_Psi2[i],
+				sens_Psi3[i],
+				sens_Psi4[i],
+				sens_Psi5[i],
+				sens_rho2[i],
+				sens_rho3[i],
+				sens_rho4[i],
+				sens_rho5[i],
+				sens_N_1[i],
+				sens_N_2[i],
+				sens_N_3[i],
+				sens_N_4[i],
+				sens_N_5[i],
+				sens_Imm[i]
+			)
+  
+  ## Calculate demographic contributions
+  # NOTE: Here we multiply sensitivities and (co)variances
+  
+  cont.mat <- matrix(NA, nrow = length(sensvec), ncol = length(sensvec))
+  for(k in 1:length(sensvec)){
+    for(m in 1:length(sensvec)){
+      cont.mat[k,m] <- dp_varcov[k,m]*sensvec[k]*sensvec[m]
+    }
+  }
+  
+  ## Summarise contributions (sum of variances and covariances)
+  cont <- rowSums(cont.mat)
+  
+  cont_Sj[i] <- cont[1]
+  cont_Sa[i] <- cont[2]
+  cont_S0[i] <- cont[3]
+  cont_Psi2[i] <- cont[4]
+  cont_Psi3[i] <- cont[5]
+  cont_Psi4[i] <- cont[6]
+  cont_Psi5[i] <- cont[7]
+  cont_rho2[i] <- cont[8]
+  cont_rho3[i] <- cont[9]
+  cont_rho4[i] <- cont[10]
+  cont_rho5[i] <- cont[11]
+  cont_N_1[i] <- cont[12]
+  cont_N_2[i] <- cont[13]
+  cont_N_3[i] <- cont[14]
+  cont_N_4[i] <- cont[15]
+  cont_N_5[i] <- cont[16]
+  cont_Imm[i] <- cont[17]
+}
+
+## Check sum of contributions agains variance in lambda
+contS.all <- cbind(cont_Sj, cont_Sa, cont_S0,
+				  cont_Psi2, cont_Psi3, cont_Psi4, cont_Psi5,
+				  cont_rho2, cont_rho3, cont_rho4, cont_rho5,
+				  cont_N_1, cont_N_2, cont_N_3, cont_N_4, cont_N_5,
+				  cont_Imm)
+
+contS.data <- as.data.frame(contS.all)
+
+total.contS <- rowSums(contS.all)
+quantile(total.contS, probs = c(0.05, 0.5, 0.995))
+
+tempvar_lambda <- rowVars(lambda[,1:(noyears-1)])
+quantile(tempvar_lambda, probs = c(0.05, 0.5, 0.995))
+# --> The variation explained by LTRE contributions and the variation in lambda are quite close
+# --> Strangely, the former is larger than the latter, but that may have to do with the fact that the LTRE analysis ignores demographic stochasticity
+
+## Compare contributions
+colMeans(contS.all)
+
+## Plot posteriors for LTRE contributions
+LTRE.S.data <- melt(contS.data)
+
+ggplot(subset(LTRE.S.data, value != 0), aes(x = variable, y = value, group = variable)) + geom_boxplot()
+ggplot(subset(LTRE.S.data, value != 0), aes(x = variable, y = abs(value), group = variable)) + geom_boxplot()
+# --> This indicates the largest contributions come from juvenile and adult survival, as well as immigration
 
 
 ###############################################################
@@ -386,3 +628,33 @@ for(i in 1:nosamples){
   cont_Imm[i] <- cont[19]
 }
 
+## Check sum of contributions agains variance in lambda
+contH.all <- cbind(cont_mHj, cont_mOj, cont_mHa, cont_mOa, cont_m0, 
+				  cont_Psi2, cont_Psi3, cont_Psi4, cont_Psi5,
+				  cont_rho2, cont_rho3, cont_rho4, cont_rho5,
+				  cont_N_1, cont_N_2, cont_N_3, cont_N_4, cont_N_5,
+				  cont_Imm)
+
+contH.data <- as.data.frame(contH.all)
+
+total.contH <- rowSums(contH.all)
+quantile(total.contH, probs = c(0.025, 0.5, 0.975))
+
+tempvar_lambda <- rowVars(lambda[,1:(noyears-1)])
+quantile(tempvar_lambda, probs = c(0.025, 0.5, 0.975))
+# --> With this one, there is less "overestimation" of variation explained by LTRE contributions (closer to observed variation in lambda)
+
+## Compare contributions
+colMeans(contH.all)
+
+## Plot posteriors for LTRE contributions
+LTRE.H.data <- melt(contH.data)
+
+ggplot(subset(LTRE.H.data, value != 0), aes(x = variable, y = value, group = variable)) + geom_boxplot()
+ggplot(subset(LTRE.H.data, value != 0), aes(x = variable, y = abs(value), group = variable)) + geom_boxplot()
+# --> This now shows that changes in natural survival contributed more than changes in harvest
+# --> It also paints a more even picture where pregnancy rate is similarly important to cause-specific mortality 
+
+save.image("AF_LTRE_Random.RData")
+
+# --> Functionality confirmed. 

@@ -1,4 +1,4 @@
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(ggridges)
 library(viridis)
@@ -6,7 +6,7 @@ library(patchwork)
 library(plyr)
 
 ## Load LTRE results
-load('200504_AF_LTRE_Fixed.RData')
+load('AF_LTRE_Fixed.RData')
 
 str(results) # LTRE with contributions of survival probabilities and mortality hazard rates
 
@@ -161,5 +161,5 @@ N.params <- c('cont_N_1', 'cont_N_2', 'cont_N_3', 'cont_N_4', 'cont_N_5', 'cont_
 p.ribbons.N <- ggplot(subset(LTRE.quant.H, variable%in%N.params), aes(x = Year, y = median, group = variable)) + geom_line(aes(color = variable)) + geom_ribbon(aes(ymin = lCI, ymax = uCI, fill = variable), alpha = 0.3) + ylab('Contribution') + xlab('') + scale_fill_manual(values = c(rep(viridis(6)[5], 5), viridis(6)[6])) + scale_color_manual(values = c(rep(viridis(6)[5], 5), viridis(6)[6])) + geom_hline(yintercept = 0, linetype = 'dotted') + theme_bw() + theme(legend.position = 'none', panel.grid = element_blank()) + facet_wrap(~variable, ncol = 1)
 p.ribbons.N
 
-
+# --> Functionality confirmed. 
 

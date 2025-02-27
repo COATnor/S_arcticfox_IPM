@@ -1,11 +1,11 @@
-library(reshape)
+library(reshape2)
 library(ggplot2)
 library(ggridges)
 library(viridis)
 library(patchwork)
 
 ## Load LTRE results
-load('200503_AF_LTRE_Random.RData')
+load('AF_LTRE_Random.RData')
 
 str(LTRE.S.data) # LTRE with contributions of survival probabilities
 str(LTRE.H.data) # LTRE with contributions of mortality hazard rates
@@ -84,3 +84,4 @@ pdf('RandomLTRE_Violins.pdf', width = 8.27, height = 11.69)
 p.summary / (p.m + ylim(-0.02, 0.08) | p.Psi + ylim(-0.02, 0.08)) / (p.rho | p.N + ylim(-0.02, 0.08))
 dev.off()
 
+# --> Functionality confirmed. 
