@@ -22,7 +22,7 @@ mySeed <- 0
 ##########################
 
 ## Load workspace containing all data
-load('Data/200228_AF_IPM_Data.RData')
+#load('Data/200228_AF_IPM_Data.RData')
 IPM.data <- readRDS('AF_IPM_Data.rds')
 
 ## Data Object
@@ -192,6 +192,7 @@ fox.code.varB4 <- nimbleCode({
   L[1,1:Tmax] <- 0
   R[1,1:Tmax] <- 0
   Imm[1] <- 0
+  ImmT[1] <- 0
   
   # Age classes 2 - 5+    	    
   for(t in 1:Tmax){        				
@@ -236,14 +237,16 @@ fox.code.varB4 <- nimbleCode({
   
   for(t in 2:Tmax){
     Imm[t] ~ dpois(ImmT[t])
-    ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
+    #ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
+    #ImmT[t] ~ T(dnorm(avgImm, sd = sigma.Imm), 0, 1500)
+    ImmT[t] ~ dlnorm(meanlog = log(avgImm), sdlog = sigma.Imm) 
     # In theory, ImmT could be negative (non-truncated normal distribution)
     # --> this may end up causing issues at some point (does not now)
     # TODO: It causes issues now (occasionally). We should use a different distribution.
   }
   
   avgImm ~ dunif(0, 400)
-  sigma.Imm ~ dunif(0, 200)
+  sigma.Imm ~ dunif(0, 10)
   
   for(a in 1:A){
     N[a,1] ~ dcat(DU.prior[1:400])
@@ -543,7 +546,8 @@ IPM.inits <- function() {list(
   sigma.m0 = runif(1,0.05,0.5),
   epsilon.m0 = rep(0, fox.constants$Tmax),
   avgImm = runif(1, 50, 100),
-  sigma.Imm = (runif(1, 10, 40)),
+  #sigma.Imm = (runif(1, 10, 40)),
+  sigma.Imm = (runif(1, 0.5, 2)),
   GooseRep = c(rep(NA, 22), 0),
   
   u.Dens = rpois(1, 4)
@@ -558,6 +562,7 @@ IPM.inits <- function() {list(
 )} 
 
 
+#initValsFull <- IPM.inits()
 initValsFull <- list(IPM.inits(), IPM.inits(), IPM.inits())
 
 
@@ -569,7 +574,7 @@ IPM.params <- c(
 "mean.rho", "a.eff1", "betaRC.rho", "betaSI.rho", "betaY.rho", "sigma.rho", 
 "par.a", "par.b", "par.c", "betaY.Psi", "betaRC.Psi", "betaSI.Psi", "sigma.Psi", 
 "N.tot", "N", "R.tot", "B.tot", "B", "meanLS", 
-"avgImm", "sigma.Imm", "Imm", 
+"avgImm", "sigma.Imm", "Imm", "ImmT", 
 "epsilon.mH", "epsilon.mO", "epsilon.m0", "epsilon.Psi", "epsilon.rho",
 "m0t", "mH", "mO", "Psi", "rho",
 "u.Dens")
@@ -589,10 +594,10 @@ nthin <- 1
 
 
 AF.IPM <- nimbleMCMC(fox.code.varB4, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
-AF.IPM <- nimbleMCMC(fox.code, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
+#AF.IPM <- nimbleMCMC(fox.code, fox.constants, fox.data, initValsFull, monitors = IPM.params, niter = niter, nburnin = nburnin, nchains = nchains, thin = nthin, setSeed = mySeed, samplesAsCodaMCMC = TRUE)
 
 
-saveRDS(AF.IPM, file = 'AF_IPM.rds')
+saveRDS(AF.IPM, file = 'AF_IPM_logImm.rds')
 
 ## Plot traces
 MCMCvis::MCMCtrace(AF.IPM,
@@ -606,3 +611,4 @@ MCMCvis::MCMCtrace(AF.IPM,
                               "u.Dens"))
 
 
+MCMCvis::MCMCtrace(AF.IPM)
