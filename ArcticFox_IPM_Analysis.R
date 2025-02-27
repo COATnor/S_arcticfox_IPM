@@ -19,8 +19,8 @@ mySeed <- 10
 
 ## Set general parameters
 Amax <- 5 # Number of age classes
-Tmax <- 18  # Number of years
-minYear <- 2004 # First year to consider
+Tmax <- 23  # Number of years
+minYear <- 1997 # First year to consider
 maxAge_yrs <- 10 # Age of the oldest female recorded
 summer_removal <- c(6,7,8,9)    #removal of summer months: numerical months to be removed from winter age at harvest data
 winter_removal <- c(1:6, 10:12) #removal of winter months: numerical months to be removed from summer age at harvest data
@@ -56,6 +56,11 @@ sourceDir <- function(path, trace = TRUE, ...) {
   }
 }
 sourceDir('R')
+
+## Generate plotting directory if not available
+if(!dir.exists("Plots")){
+  dir.create("Plots")
+}
 
 ## Set "switches" for running different model versions
 
@@ -325,17 +330,6 @@ Sys.time() - t1
 
 
 saveRDS(IPM.out, file = "RedFoxIPM_main_singleCensus_combHarvest2.rds") 
-#saveRDS(IPM.out, file = "RedFoxIPM_genData1.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_genData2.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_survPrior1.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_survPrior2.rds") 
-#saveRDS(IPM.out, file = "RedFoxIPM_survPrior3.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_immEst1.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_immEst2.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_immEst3.rds")
-#saveRDS(IPM.out, file = "RedFoxIPM_noSppWeigth.rds")
-#saveRDS(IPM.out, file = "RedFoxIndepModels.rds")
-
 
 #MCMCvis::MCMCtrace(IPM.out)
 
@@ -348,80 +342,11 @@ saveRDS(IPM.out, file = "RedFoxIPM_main_singleCensus_combHarvest2.rds")
 compareModels(Amax = Amax, 
               Tmax = Tmax, 
               minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds", 
-                                 "RedFoxIPM_main_singleCensus_splitHarvest.rds",
-                                 "RedFoxIPM_main_singleCensus_combHarvest.rds"), 
-              model.names = c("Two census (original)", 
-                              "One census, split harvest",
-                              "One census, combined harvest"), 
-              plotFolder = "Plots/Comp_SimplifiedCensus")
-
-compareModels(Amax = Amax, 
-              Tmax = Tmax, 
-              minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds",
-                                 "RedFoxIPM_main_singleCensus_combHarvest.rds",
-                                 "RedFoxIPM_main_singleCensus_combHarvest2.rds"), 
-              model.names = c("Two census (original)", 
-                              "One census",
-                              "One census, equal adult harvest"), 
-              plotFolder = "Plots/Comp_SimplifiedCensus2")
-
-## Genetic data likelihoods
-compareModels(Amax = Amax, 
-              Tmax = Tmax, 
-              minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds",
-                                 "RedFoxIPM_genData1.rds",
-                                 "RedFoxIPM_genData2.rds"), 
-              model.names = c("sum. likelihood (th = 0.05)", 
-                              "sum. likelihood (th = 0.2)",
-                              "ind. likelihood (rescaled p)"), 
-              plotFolder = "Plots/CompFinal_GenData")
-
-
-## Survival priors
-compareModels(Amax = Amax, 
-              Tmax = Tmax, 
-              minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds", 
-                                 "RedFoxIPM_survPrior1.rds",
-                                 "RedFoxIPM_survPrior2.rds",
-                                 "RedFoxIPM_survPrior3.rds"), 
-              model.names = c("Meta-analysis", 
-                              "Hoenig model",
-                              "North Sweden",
-                              "Bristol"), 
-              plotFolder = "Plots/CompFinal_SurvPriors")
-
-
-## Rodent covariate type
-compareModels(Amax = Amax, 
-              Tmax = Tmax, 
-              minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds", 
-                                 "RedFoxIPM_noSppWeigth.rds"), 
-              model.names = c("species weights", 
-                              "no weights"), 
-              plotFolder = "Plots/CompFinal_RodentCovType")
-
-
-## Immigration models
-compareModels(Amax = Amax, 
-              Tmax = Tmax, 
-              minYear = minYear, 
-              post.filepaths = c("RedFoxIPM_main.rds",
-                                 "RedFoxIPM_immEst1.rds",
-                                 "RedFoxIPM_immEst2.rds",
-                                 "RedFoxIPM_immEst3.rds"), 
-              model.names = c("Imm. rate, pooled gen. data", 
-                              "Imm. rate, yearly gen. data",
-                              "Imm. rate, naive",
-                              "Imm. numbers (logNorm)"), 
-              plotFolder = "Plots/CompFinal_ImmModels")
-
-
-
+              post.filepaths = c("AF_IPM.rds", 
+                                 "AF_IPM_logImm.rds"), 
+              model.names = c("Original", 
+                              "logNormal Immigration dist."), 
+              plotFolder = "Plots/Comp_ImmDistributions")
 
 
 ###########################################

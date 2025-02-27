@@ -14,12 +14,6 @@
 #' in mcmc.list format. Can be procided instead of post.filepaths. 
 #' @param model.names character vector with user-defined names for models to 
 #' compare. 
-#' @param censusCollapse logical vector. Determines for each model whether June 
-#' or October should be used as the population census in comparisons. This was
-#' necessary for comparing earlier model versions without summer harvest (and hence
-#' no October census) to models with summer harvest. In the majority of cases,
-#' this will not be relevant any longer and can be ignored (if not provided, it
-#' will automatically default to plot the June census population size).
 #' @param plotFolder character string containing the path to the folder in which
 #' to store comparison plots.  
 #' @param returnSumData logical. If TRUE, returns a data frame containing 
@@ -34,7 +28,7 @@
 #' 
 compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE, 
                           post.filepaths, post.list, 
-                          model.names, censusCollapse, 
+                          model.names,
                           plotFolder, returnSumData = FALSE){
   
   ## Check models are specified correctly
@@ -52,11 +46,6 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   ## Count number of models
   nModels <- length(model.names)
   
-  ## Make censusCollapse object if not provided
-  if(missing(censusCollapse)){
-    censusCollapse <- rep(TRUE, nModels)
-  }
-  
   ## Set maxYear if not provided
   if(missing(maxYear)){
     maxYear <- minYear + Tmax - 1
@@ -71,25 +60,6 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
       samples <- as.matrix(post.list[[i]])
     }else{
       samples <- as.matrix(readRDS(post.filepaths[i]))
-    }
-    
-    # Collapse censuses if necessary
-    # if(censusCollapse[i]){
-    #   
-    #   samples[, "N.tot[1]"] <- rowSums(samples[, paste0("octN[", 1:Amax, ", 1]")])
-    #   
-    #   for(t in 2:(Tmax+1)){
-    #     samples[, paste0("N.tot[", t, "]")] <- samples[, paste0("N.tot[", t, "]")] + samples[, paste0("Imm[", t, "]")]
-    #   }
-    # }
-    
-    if(!censusCollapse[i]){
-      
-      samples[, "N.tot[1]"] <- 0
-      
-      for(t in 2:(Tmax+1)){
-        samples[, paste0("N.tot[", t, "]")] <- samples[, paste0("N.tot[", t, "]")] - samples[, paste0("Imm[", t, "]")]
-      }
     }
     
     # Change format and add to list
@@ -127,8 +97,12 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
                                             !is.na(Idx1) & grepl("Mu", Parameter) ~ Idx1),
                   Year = YearIdx + minYear - 1,
                   Age = ifelse(AgeIdx == Amax, paste0(Amax-1, "+"), AgeIdx-1),
-                  ParamName = stringr::word(Parameter, 1, sep = "\\["))
-
+                  ParamName = stringr::word(Parameter, 1, sep = "\\[")) %>%
+    
+    dplyr::mutate(Age = dplyr::case_when(!(ParamName %in% c("Mu.mH", "Mu.mO")) ~ Age,
+                                         AgeIdx == 1 ~ "Adult",
+                                         AgeIdx == 2 ~ "Juvenile"))
+    
     
   sum.data <- sum.data %>%
     dplyr::left_join(idx.data, by = "Parameter")
@@ -136,18 +110,21 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   ## Set parameter groups for plotting posterior density overlaps
   plot.params <- list(
     VRmeans = c(paste0("Mu.mH[", 1:Amax, "]"),
-                paste0("Mu.mHs[", 1:Amax, "]"),
                 paste0("Mu.mO[", 1:Amax, "]"), 
                 paste0("Mu.Psi[", 2:Amax, "]"), 
-                paste0("Mu.rho[", 2:Amax, "]"),  
-                "Mu.S0", "Mu.immR", "Mu.Imm"),
+                paste0("Mu.rho[", 2:Amax, "]"), 
+                "par.a", "par.b", "par.c", "a.eff1",
+                "S0", "avgImm"),
     
-    VReffects = c("sigma.mH", "sigma.mHs", "sigma.mO", "sigma.Psi", "sigma.rho", 
-                  "sigma.immR", "logsigma.Imm",
-                  "betaHE.mH", 
-                  "betaR.Psi", paste0("betaR.Psi[", 2:3, "]"),
-                  "betaR.rho", paste0("betaR.rho[", 2:3, "]"),
-                  "betaR.mO", "betaR.immR"),
+    VReffects = c("sigma.mH", "sigma.mO", 
+                  "sigma.Psi", "sigma.rho", 
+                  "sigma.m0", "sigma.Imm",
+                  "betaHP.mH", 
+                  "betaR.Psi", "betaY.Psi", "betaRC.Psi", "betaSI.Psi",
+                  "betaRC.rho", "betaSI.rho", "betaY.rho",
+                  "betaRC.m0", "betaSI.m0", "betaY.m0",
+                  "betaY.mO", "betaRC.mO", "betaG.mO", "betaSI.mO"
+                  ),
     
     Imm = paste0("Imm[", 1:Tmax, "]"),
     
@@ -160,15 +137,15 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   
   ## Set parameters plotting time series of posterior summaries
   plotTS.paramsAge <- list(
-    ParamNames = c("mO", "S", "mH", "mHs", "Psi", "rho"),
+    ParamNames = c("mO", "S", "mH", "Psi", "rho"),
     ParamLabels = c("Natural mortality", "Survival", 
-                    "Harvest mortality", "Summer harvest mortality", "Pregnancy rate", "# fetuses/female")
+                    "Harvest mortality", "Pregnancy rate", "# fetuses/female")
   )
 
   plotTS.params <- list(
-    ParamNames = c("N.tot", "B.tot", "R.tot", "Imm", "immR"),
+    ParamNames = c("N.tot", "B.tot", "R.tot", "Imm", "m0t"),
     ParamLabels = c("Female population size", "# breeding females", "# female recruits", 
-                    "# female immigrants", "Immigration rate")
+                    "Denning mortality", "# female immigrants")
   )
   
   ## Optional: convert population size estimates to log scale
@@ -212,19 +189,20 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   pdf(paste0(plotFolder, "/PosteriorSummaries_TimeSeriesAge.pdf"), width = 8, height = 8)
   for(x in 1:length(plotTS.paramsAge$ParamNames)){
     
-    print(
-      ggplot(subset(sum.data, ParamName == plotTS.paramsAge$ParamNames[x] & Year <= maxYear), aes(group = Model)) + 
-        geom_line(aes(x = Year, y = median, color = Model)) + 
-        geom_ribbon(aes(x = Year, ymin = lCI, ymax = uCI, fill = Model), alpha = 1/nModels) + 
-        scale_fill_manual(values = plot.cols) + scale_color_manual(values = plot.cols) + 
-        scale_x_continuous(breaks = c(minYear:maxYear), labels = c(minYear:maxYear)) + 
-        facet_wrap(~ Age, ncol = 1, scales = "free_y") + 
-        ggtitle(plotTS.paramsAge$ParamLabels[x]) +  
-        theme_bw() + theme(panel.grid.minor = element_blank(), 
-                           panel.grid.major.y = element_blank(), 
-                           axis.text.x = element_text(angle = 45, vjust = 0.5))
-    )
-    
+    if(plotTS.paramsAge$ParamNames[x] %in% sum.data$ParamName){
+      print(
+        ggplot(subset(sum.data, ParamName == plotTS.paramsAge$ParamNames[x] & Year <= maxYear), aes(group = Model)) + 
+          geom_line(aes(x = Year, y = median, color = Model)) + 
+          geom_ribbon(aes(x = Year, ymin = lCI, ymax = uCI, fill = Model), alpha = 1/nModels) + 
+          scale_fill_manual(values = plot.cols) + scale_color_manual(values = plot.cols) + 
+          scale_x_continuous(breaks = c(minYear:maxYear), labels = c(minYear:maxYear)) + 
+          facet_wrap(~ Age, ncol = 1, scales = "free_y") + 
+          ggtitle(plotTS.paramsAge$ParamLabels[x]) +  
+          theme_bw() + theme(panel.grid.minor = element_blank(), 
+                             panel.grid.major.y = element_blank(), 
+                             axis.text.x = element_text(angle = 45, vjust = 0.5))
+      )
+    }
   }
   dev.off()
   
