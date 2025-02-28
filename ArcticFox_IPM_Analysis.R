@@ -62,27 +62,17 @@ if(!dir.exists("Plots")){
 # 1) DATA PREPARATION #
 #*********************#
 
-# 1a) Download and reformat carcass data
+# 1a) Load and reformat carcass data
 #-------------------------------#
 
-## Download carcass data
-carcass.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-                                      COATdataset.name = carcass.dataset.name,
-                                      COATdataset.version = carcass.dataset.version)
+## Load carcass data
+carcass.data.raw <- readr::read_csv(carcass.data.path)
 
 ## Reformat carcass data
-carcass.data <- reformatData_carcass(Amax = Amax,   
-                                     summer_removal = summer_removal ,
-                                     winter_removal = winter_removal ,
+carcass.data <- reformatData_carcass(Amax = Amax, 
+                                     minYear = minYear, maxYear = minYear + Tmax - 1,
                                      area_selection = area_selection,
-                                     plac_start = plac_start,
-                                     plac_end = plac_end ,
-                                     embr_start = embr_start ,
-                                     embr_end = embr_end,
-                                     carcass.dataset = carcass.data.raw,
-                                     shapefile.dir = shapefile.dir,
-                                     add.sumr.unaged = add.sumr.unaged, 
-                                     saAH.years = saAH.years)
+                                     carcass.data = carcass.data.raw)
 
 
 # 1b) Age-at-Harvest data #
