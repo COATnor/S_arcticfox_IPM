@@ -10,6 +10,8 @@ library(metafor)
 library(patchwork)
 library(coda)
 
+options(tibble.width = Inf)
+
 #**********#
 # 0) SETUP #
 #**********#
@@ -21,31 +23,21 @@ mySeed <- 10
 Amax <- 5 # Number of age classes
 Tmax <- 23  # Number of years
 minYear <- 1997 # First year to consider
-maxAge_yrs <- 10 # Age of the oldest female recorded
-summer_removal <- c(6,7,8,9)    #removal of summer months: numerical months to be removed from winter age at harvest data
-winter_removal <- c(1:6, 10:12) #removal of winter months: numerical months to be removed from summer age at harvest data
-area_selection<- c("Inner", "BB",  "Tana")# choosing varanger sub area ("Inner" / "BB" / "Tana)     ((BB = Batsfjord and Berlevag areas))
-# start and end of placental scars and embryo sample periods (julian day)
-plac_start <- 180 #including
-plac_end   <- 80  #until, not including
-embr_start <- 100 #including
-embr_end   <- 140 #until, not including
+area_selection <- "Advent-/Sassendalen" # Areas to consider
 
-## set dataset names, versions, and directories, and access
-carcass.dataset.name <- "v_redfox_carcass_examination_v3"
-carcass.dataset.version <- 3
+## Set COAT dataset names, versions, and directories, and access
+reindeer.dataset.name <-"S_ungulates_carcasses_adventdalen_summer_v3"
+rodent.dataset.version <- 3
 
-rodent.dataset.name <-"v_rodents_snaptrapping_abundance_regional_v5"
-rodent.dataset.version <- 5
-
-# Stijn
-shapefile.dir <- "C:\\Users\\sho189\\OneDrive - UiT Office 365\\PhD\\RedfoxIPM\\Fox areas shapefile\\tana rest"
-COAT_key <- Sys.getenv("API_COAT_Stijn") # Stijn's API key for the COAT dataportal is saved as an environmental variable on the computer 
-
-# Chloe
-#shapefile.dir <- "C:/Users/chloe.nater/OneDrive - NINA/Documents/Projects/RedFox_IPM/Data/shapefiles"
-shapefile.dir <- "Data/shapefiles"
 COAT_key <- Sys.getenv("COAT_API")
+
+## Set filepaths for local datasheets
+carcass.data.path <- c("Data/200108_carcass_trap.csv")
+denSurvey.data.path <- c("Data/200214_DenSurvey.csv")
+cmrr.data.path <- c("Data/200110_AF_tagging_red.csv")
+
+seaIce.data.path <- c("Data/isfjorden_1966-2019.csv")
+goose.data.path <- c("Data/Data/SvalbardTerr_Covariates.csv")
 
 ## Source all functions in "R" folder
 sourceDir <- function(path, trace = TRUE, ...) {
@@ -63,53 +55,8 @@ if(!dir.exists("Plots")){
 }
 
 ## Set "switches" for running different model versions
+# --> TBA as need arises
 
-# Covariate toggles
-fitCov.mH <- FALSE # Fit covariates on mH (harvest effort)
-fitCov.mO <- TRUE # Fit covariates on mO (rodent abundance)
-fitCov.Psi <- TRUE # Fit covariates on Psi (rodent abundance)
-fitCov.rho <- TRUE # Fit covariates on rho (rodent abundance)
-fitCov.immR <- TRUE # Fit covariates on immigration rate (rodent abundance) - only if immigration is estimated as a rate
-rCov.idx <- FALSE # Use discrete vs. continuous rodent covariate
-nLevels.rCov <- 2 # 2-level discrete rodent covariate
-#nLevels.rCov <- 3 # 3-level discrete rodent covariate (data not currently prepared)
-standSpec.rCov <- TRUE # standardize different rodent species before summing (offset catchability) v.s. simply sum all numbers
-reinCov.VarTana <- TRUE # Calculate the reindeer carcass data count covariate using Varanger (+Tana) municipalities as geographical area. FALSE is for whole of Eastern Finnmark
-
-# Random year effect toggles
-mO.varT <- TRUE
-
-# Age-at-harvest data toggles
-add.sumr.unaged <- TRUE # Add summer harvested individuals as un-aged individuals to the total harvested individuals in winter
-saAH.years <- c(2005:2012) # Years for which the summer age at harvest matrix should be constructed (e.g. years in which summer harvest was aged consistently)
-
-# Annual survival prior type toggles
-HoenigPrior <- FALSE # Use prior on natural mortality derived from Hoenig model
-#sPriorSource <- "Bristol" # Base survival prior on data from Bristol (not hunted)
-#sPriorSource <- "NSweden" # Base survival prior on data from North Sweden (lightly hunted)
-sPriorSource <- "metaAll" # Base survival prior on meta-analysis including all populations
-#sPriorSource <- "metaSub" # Base survival prior on meta-analysis including only not/lightly hunted populations
-
-# Immigration parameters toggle
-imm.asRate <- TRUE # Estimating immigration as a rate as opposed to numbers
-
-# Genetic immigration data toggles (details in documentation of wrangleData_gen function
-poolYrs.genData <- TRUE # Pool data across all years
-useData.gen <- TRUE # Use genetic data for estimation of immigration rate
-indLikelihood.genData <- FALSE # Apply an individual-level likelihood for genetic data
-threshold <- 0.05
-#threshold <- 0.2
-#pImm.type <- "original"
-pImm.type <- "rescaled"
-#pImm.type <- "LL-based"
-
-# Den survey prior and data toggles
-useData.pup <- TRUE
-useInfPrior.S0 <- FALSE
-
-## Changes to denning survival prior
-S0.mean.offset <- 0
-S0.sd.factor <- 1
 
 #*********************#
 # 1) DATA PREPARATION #
