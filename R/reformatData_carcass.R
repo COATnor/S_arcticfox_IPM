@@ -3,8 +3,8 @@
 #' @param Amax  integer. Number of age classes to consider in analyses.
 #' @param minYear  integer. First year to consider in analyses.
 #' @param maxYear  integer. Last year to consider in analyses.
-#' @param area_selection a vector of study-area sub-area names to consider in the analyses: c("Inner", "BB",  "Tana")
-#' @param carcass.dataset dataframe containing the dataset downloaded from the COAT dataportal.
+#' @param area_selection a vector of study-area sub-area names to consider in the analyses. Currently, only "Advent-/Sassendalen" is supported.
+#' @param carcass.dataset.raw dataframe containing the arctic fox carcass dataset.
 #'
 #' @return a list containing the age-at-harvest matrix and dataframes with embryo count (P1var) and placental scar presence-absence (P2var) data.
 #' @export
@@ -13,11 +13,13 @@
 
 
 reformatData_carcass <- function (Amax, minYear, maxYear,
-                                  area_selection, carcass.data) {
+                                  area_selection, carcass.data.raw) {
   
   #---------------------------#
   # CONSOLIDATION & FILTERING #
   #---------------------------#
+  
+  carcass.data <- carcass.data.raw 
   
   ## Check for and drop any entries with unknown trapping season
   if(any(is.na(carcass.data$Trapseason))){

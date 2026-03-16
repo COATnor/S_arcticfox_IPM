@@ -34,7 +34,7 @@ COAT_key <- Sys.getenv("COAT_API")
 ## Set filepaths for local datasheets
 carcass.data.path <- c("Data/200108_carcass_trap.csv")
 denSurvey.data.path <- c("Data/200214_DenSurvey.csv")
-cmrr.data.path <- c("Data/200110_AF_tagging_red.csv")
+cmrr.data.path <- c("Data/SvalbardArcticFox_CaptureRecapture_1984-2016.csv")
 
 seaIce.data.path <- c("Data/isfjorden_1966-2019.csv")
 goose.data.path <- c("Data/Data/SvalbardTerr_Covariates.csv")
@@ -63,7 +63,7 @@ if(!dir.exists("Plots")){
 #*********************#
 
 # 1a) Load and reformat carcass data
-#-------------------------------#
+#----------------------------------#
 
 ## Load carcass data
 carcass.data.raw <- readr::read_csv(carcass.data.path)
@@ -72,47 +72,36 @@ carcass.data.raw <- readr::read_csv(carcass.data.path)
 carcass.data <- reformatData_carcass(Amax = Amax, 
                                      minYear = minYear, maxYear = minYear + Tmax - 1,
                                      area_selection = area_selection,
-                                     carcass.data = carcass.data.raw)
+                                     carcass.data.raw = carcass.data.raw)
 
 
 # 1b) Age-at-Harvest data #
 #--------------------------------#
 
-## Winter AaH data
-wAaH.data <- wrangleData_AaH(AaH.datafile = carcass.data$WAaH.matrix, 
-                             Amax = Amax)
-## Summer AaH data
-sAaH.data <- wrangleData_AaH(AaH.datafile = carcass.data$SAaH.matrix, 
-                             Amax = Amax)
+## Extract AaH data from processed carcass data
+AaH.data <- list(C = carcass.data$AaH.mat,
+                 pData = carcass.data$pData)
+
 
 
 # 1c) Reproduction data #
 #-----------------------#
 
-## Set data paths/filenames
-P1.datafile <- carcass.data$P1var # Placental scar/embryo count
-P2.datafile <- carcass.data$P2var # Presence of placental scars/embryos/pregnancy signs
-
-## Prepare reproduction data
-rep.data <- wrangleData_rep(P1.datafile = P1.datafile, 
-                            P2.datafile = P2.datafile,
-                            Amax = Amax, 
-                            minYear = minYear)
+## Extract reproduction data from processed carcass data
+rep.data <- list(P1 = carcass.data$P1.data,
+                 P2 = carcass.data$P2.data)
 
 
-# 1d) Genetic data #
-#------------------#
+# 1d) Mark-recapture recovery data #
+#----------------------------------#
 
-## Set data paths
-genetics.datapath <- "Data/RedFox_genetics_immigrant_probabilities.txt"
-#genetics.datapath <- "Data/RedFox_genetics_immigrant_probabilities_LvarLother.txt"
+## Load CMRR data
+cmrr.data.raw <- readr::read_csv(cmrr.data.path)
 
-## Prepare genetic data
-gen.data <- wrangleData_gen(datapath = genetics.datapath,
-                            minYear, 
-                            onlyFemales = FALSE, 
-                            poolYrs.genData = poolYrs.genData, 
-                            threshold = threshold)
+## Prepare CMRR data
+cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
+                               minYear = minYear, maxYear = minYear + Tmax - 1,
+                               area_selection = area_selection)
 
 
 # 1e) Opportunistic pup observation data #
