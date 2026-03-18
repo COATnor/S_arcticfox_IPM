@@ -114,9 +114,9 @@ cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
 # 1e) Den survey data #
 #---------------------#
 
-## Prepare pup observation data
-#pup.data <- wrangleData_pup(datapath = denSurvey.data.path,
-#                            minYear = minYear)
+## Prepareden survey data
+denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
+                              minYear = minYear)
 
 
 # 1f) GPS collar survival data #
