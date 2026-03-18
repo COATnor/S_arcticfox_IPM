@@ -1,8 +1,7 @@
 #' Downloads data from the COAT dataportal
 #'
 #' This function is based on scripts provided in the COATnor repository:
-#' https://github.com/COATnor/data_management_scripts/blob/master/download_dataset_from_coat_data_portal_long.R
-#' https://github.com/COATnor/data_management_scripts/blob/master/download_dataset_from_coat_data_portal.R
+#' https://github.com/COATnor/coat_data_portal_example_scripts/blob/master/download_data_from_coat_data_portal.R
 #' 
 #' @param COAT_key string. API key for the COAT dataportal. Should be saved as an environmental variable.
 #' @param COATdataset.name string. Name (including the version) of the dataset you want to download
@@ -14,7 +13,7 @@
 #' @examples
 
 
-downloadData_COAT <- function(COAT_key, COATdataset.name, COATdataset.version) {
+downloadData_COAT <- function(COAT_key, COAT_module, COATdataset.name, COATdataset.version) {
 
 #### ------------------------------------------------------------------------------------------------------------ ####
 #### DOWNLOAD DATA FROM THE COAT DATA PORTAL
@@ -35,61 +34,43 @@ COAT_key <- COAT_key  # write here your API key if you are a registered user, co
 # the API can be found on you page on the COAT data portal (log in and click on your name in the upper right corner of the page)
 # The use of an API key allows the user to access also non-public data
 
-ckanr_setup(url = COAT_url, key = COAT_key)  # set up the ckanr-API
+ckanr::ckanr_setup(url = COAT_url, key = COAT_key)  # set up the ckanr-API
+
+## Source functions provided by COAT
+source("https://github.com/COATnor/data_management_scripts/blob/master/download_data_from_coat_data_portal.R?raw=TRUE")
 
 
 ## ---------------------------------- ##
 ## DOWNLOAD DATA
 ## ---------------------------------- ##
 
-## list all datasets available on the COAT data portal
-package_list()
 
-## serach for your dataset
-name <- COATdataset.name  # write here the name including the version of the dataset you want to download
-version <- COATdataset.version    # write here the version of the dataset
-
-pkg <- package_search(q = list(paste("name:", name, sep = "")), fq = list(paste("version:", version, sep = "")), include_private = TRUE)$results[[1]] # search for the dataset and save the results
-urls <- pkg$resources %>% sapply('[[','url')  # get the urls to the files included in the dataset
-filenames <-  pkg$resources %>% sapply('[[','name')  # get the filenames
-
-
-## specify if the downloaded files should be saved to your computer or imported into R
-store <- "session"  # "session" (imports data into R) or "disk" (saves the file to you computer)
-
-## specify the desination directory for downloaded dataset 
-dest_dir <- ""  # write here the path to the destination directory, a folder with the dataset name will be created in the specified directory and all files of the dataset will be saved in this folder
-# specifying a destination directory is only necessary if you want to save the files on you computer (store = "disk")
-# if you want to import the data into R, specifying a destination directory is not necessary (store = "session")
-
-## create a folder with the dataset name if files should be saved to computer-> all data files will be saved here
-if (store == "disk") {
-  dir.create(paste(dest_dir, name, sep = "/"), showWarnings = FALSE)
+## Check that selected module is available
+if(!(COAT_module %in% ckanr::organization_list(as = "table")$name)){
+  stop("Selected module is not available on the COAT data portal. Please check the spelling of the module name and make sure that the module is available on the COAT data portal.")
 }
 
-## download all files of the dataset
-mylist <- c()  # empty object for the files
-
-for (i in 1:length(urls)) {
-  mylist[[i]] <- ckan_fetch(urls[i],
-                            store = store,
-                            path = paste(dest_dir, name, filenames[i], sep = "/"),
-                            sep = ";", 
-                            header = TRUE
-  )
+## Check that selected dataset is available
+#if(!(COATdataset.name %in% list_datasets(module = COAT_module, printContents = FALSE)$name)){
+if(!(COATdataset.name %in% list_datasets(module = COAT_module)$name)){
+  stop("Selected dataset is not available in the selected module on the COAT data portal. Please check the spelling of the dataset name and make sure that the dataset is available in the selected module on the COAT data portal.")
 }
 
+## list the names of all data files of the selected dataset (optional)
+#filenames <- list_data_files(COATdataset.name, printContents = FALSE)
+filenames <- list_data_files(COATdataset.name)
 
-## ---------------------------------- ##
-## ORGANIZE THE DATA - if imported into R
-## ---------------------------------- ##
 
-## this part splits the list that contains all files into coordinate file, aux file and data file
+## download data
+coat_dat <- download_coat_data(name = COATdataset.name, # write here name of the dataset (choose from the list above)
+                               filenames = filenames[!grepl("readme|aux|coordinates", filenames)], # names of the files that should be downloaded, e.g. all data files (without readme, aux and coordinate file)
+                               store = "session", #"session" for importing the data in the current R session, "disk" for saving the data on your computer
+                               out.dir = NA) # if store = "disk", you have to specify the path to a folder where the data should be stored
 
-#coordinates <- mylist[[grep("coordinates", urls)]]
-#aux <- mylist[[grep("aux", urls)]]
-dat <- keep(mylist, !grepl("coordinates|aux|readme", urls)) %>% do.call(rbind, .)  # this does not work if the data files have different structures (e.g. temperature datasets)
+## combine all data files of the list in one data frame (works only if all files have the same structure)
+dat <- do.call(rbind, coat_dat)
 
+## Return data
 return(dat)
 }
 
