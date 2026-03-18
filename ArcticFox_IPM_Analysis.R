@@ -26,8 +26,8 @@ minYear <- 1997 # First year to consider
 area_selection <- "Advent-/Sassendalen" # Areas to consider
 
 ## Set COAT dataset names, versions, and directories, and access
-reindeer.dataset.name <-"S_ungulates_carcasses_adventdalen_summer_v3"
-rodent.dataset.version <- 3
+reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer_v5"
+reindeer.dataset.version <- 5
 
 COAT_key <- Sys.getenv("COAT_API")
 
@@ -38,9 +38,10 @@ cmrr.data.path <- c("Data/SvalbardArcticFox_CaptureRecapture_1984-2016.csv")
 gps.data.path <- c("Data/Survival_GPS.csv")
 gps.metadata.path <- c("Data/Metadata_Survival_GPS.csv")
 
-
+reindeer.data.path <- c("Data/SvalbardTerr_Covariates.csv")
+goose.data.path <- c("Data/SvalbardTerr_Covariates.csv")
 seaIce.data.path <- c("Data/isfjorden_1966-2019.csv")
-goose.data.path <- c("Data/Data/SvalbardTerr_Covariates.csv")
+
 
 ## Source all functions in "R" folder
 sourceDir <- function(path, trace = TRUE, ...) {
@@ -133,19 +134,24 @@ gps.metadata <- readr::read_csv(gps.metadata.path)
 # 1g) Environmental data #
 #------------------------#
 
-## Download rodent data
-rodent.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-                                     COATdataset.name = rodent.dataset.name,
-                                     COATdataset.version = rodent.dataset.version)
+## REINDEER CARCASSES
 
-## Reformat rodent data
-rodent.data <- reformatData_rodent(rodent.dataset = rodent.data.raw,
-                                   minYear = minYear)
+# Download reindeer data from COAT data portal
+reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
+                                       COAT_module = "ungulate-module",
+                                       COATdataset.name = reindeer.dataset.name,
+                                       COATdataset.version = reindeer.dataset.version)
+
+# Load old reindeer data (only 2012 onwards are on COAR data portal)
+reindeer.data.old <- readr::read_csv(reindeer.data.path)
 
 ## Reformat reindeer data
-reindeer.data <- reformatData_reindeer(minYear = minYear,
-                                       Tmax = Tmax,
-                                       reinCov.VarTana = reinCov.VarTana)
+reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
+                                          reindeer.data.old = reindeer.data.old,
+                                          prioritiseCOAT = TRUE)
+
+
+
 
 
 # 1h) Conceptual year information #
