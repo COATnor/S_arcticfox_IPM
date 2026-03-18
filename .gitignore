@@ -54,6 +54,9 @@ rsconnect/
 *.xlsx
 *.xls
 
+# Sea ice data folder
+Sea_ice_coverage_Svalbard_foxes_habitat_1997-2024/
+
 # RData and RDS files
 *.RData
 *.rds
