@@ -104,7 +104,7 @@ reformatData_carcass <- function (Amax, minYear, maxYear,
     dplyr::filter(!is.na(Placental_scar) & !is.na(Age)) %>%
     
     # Drop all individuals in age class 1 (juveniles that should not have placental scars)
-    dplyr::filter(Age > 1) %>%
+    # dplyr::filter(Age > 1) %>%
     
     # Make binary reproduction variable
     dplyr::mutate(Rep = ifelse(Placental_scar > 0, 1, 0))
