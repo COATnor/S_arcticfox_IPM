@@ -53,41 +53,10 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
                                       id_name = "no", 
                                       state_name = "state", 
                                       age_name = "Year_first")
-    
   
+  CH <- CH.data$ch
+  firstyear <- CH.data$firstyear
   
-  ## Function for transforming longitudinal data into multistate capture histories
-  fox.data=function(){
-    
-    # Function to create the capture histories and age at occasion (first year or not) for each individual
-    cmr.sort = function(data,t,no,state,firstyear){   # t=time, no=animal number
-      
-      Ncapture = nrow(data)  #counts the number of capture entries
-      Nanimal = data[Ncapture,no]  
-      occasion = data[,t]-min(data[,t])+1
-      
-      cmr = matrix(0,Nanimal,max(occasion))
-      first = matrix(0,Nanimal,max(occasion))
-      
-      for (i in 1:Ncapture) {
-        cmr[data[i,no],occasion[i]] <- data[i,state]
-        first[data[i,no],occasion[i]] <- data[i,firstyear]
-      }
-      return(list(cmr=cmr,first=first))
-    }
-    
-    fox.data = cmr.sort(fox,"Session","no","state","firstyear")
-    fox.cmr = fox.data$cmr
-    fox.age = fox.data$first
-    return(list(ch = fox.cmr, firstyear = fox.age))
-  }
-  
-  ## Write multistate capture histories
-  CH <- fox.data()$ch
-  firstyear <- fox.data()$firstyear
-  
-  ## Remove NA's from firstyear
-  firstyear[is.na(firstyear)] <- 0
   
   ## Compute vector with occasion of first capture
   get.first <- function(x) min(which(x!=0))
@@ -104,7 +73,7 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
     rrCH2 <- CH
     rrCH2[rrCH2%in%c(0,5)] <- 4 # --> removing resightings/telemetry
     
-    # CAPTURE HISTORIES FOR JAGS (MAIN DATA) - Harvest recoveries only
+    # CAPTURE HISTORIES FOR ANALYSIS (MAIN DATA) - Harvest recoveries only
     rCH <- CH
     for(i in 1:dim(rCH)[1]){
       for(t in (f[i]+1):dim(rCH)[2]){
@@ -182,18 +151,21 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   # NOTE: With this formulation, the recovery rate r will be the same for the CMRR and age-at-death likelihoods
   
   # --> The foxes also in carcass data are:
-  #		- No 69: RW137-OG
-  #		- No 76:  WB009-RR
-  #		- No 142: YY016-YY
+  #		- RW137-OG
+  #		- WB009-RR
+  #		- YY016-YY
   #		- G-Y001 (not included because marked outside core area)
+  
+  target.ids <- unique(subset(fox, Tag_ID %in% c("RW137-OG", "WB009-RR", "YY016-YY", "G-Y001"))$no)
   
   rrCH3 <- CMRR.data$rrCH2
   rrCH3[which(rrCH3==3)] <- 4
-  rrCH3[69,] <- CMRR.data$rrCH2[69,]
-  rrCH3[76,] <- CMRR.data$rrCH2[76,]		
-  rrCH3[142,] <- CMRR.data$rrCH2[142,]
+  rrCH3[target.ids,] <- CMRR.data$rrCH2[target.ids,]
   
   CMRR.data$rrCH3 <- rrCH3
+  
+  ## Return output
+  return(CMRR.data)
   
   }
   
