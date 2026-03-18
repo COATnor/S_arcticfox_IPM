@@ -35,6 +35,9 @@ COAT_key <- Sys.getenv("COAT_API")
 carcass.data.path <- c("Data/200108_carcass_trap.csv")
 denSurvey.data.path <- c("Data/200214_DenSurvey.csv")
 cmrr.data.path <- c("Data/SvalbardArcticFox_CaptureRecapture_1984-2016.csv")
+gps.data.path <- c("Data/Survival_GPS.csv")
+gps.metadata.path <- c("Data/Metadata_Survival_GPS.csv")
+
 
 seaIce.data.path <- c("Data/isfjorden_1966-2019.csv")
 goose.data.path <- c("Data/Data/SvalbardTerr_Covariates.csv")
@@ -104,25 +107,24 @@ cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
                                area_selection = area_selection)
 
 
-# 1e) Opportunistic pup observation data #
-#----------------------------------------#
-
-## Set data path
-pups.datapath <- "Data/Rfox_early_litter_sizes.csv"
+# 1e) Den survey data #
+#---------------------#
 
 ## Prepare pup observation data
-pup.data <- wrangleData_pup(datapath = pups.datapath,
-                            minYear = minYear)
+#pup.data <- wrangleData_pup(datapath = denSurvey.data.path,
+#                            minYear = minYear)
 
 
-# 1f) Harvest effort data #
-#-------------------------#
+# 1f) GPS collar survival data #
+#------------------------------#
 
-## Prepare harvest effort data
-hunter.data <- reformatData_hunters(area_selection = area_selection,
-                                    carcass.dataset = carcass.data.raw,
-                                    shapefile.dir = shapefile.dir)
+## Load GPS collar data
+gps.data <- readr::read_csv(gps.data.path)
+gps.metadata <- readr::read_csv(gps.metadata.path)
 
+# reformatData_gps(gps.data, gps.metadata, 
+#                  minYear, nMonths_aggregate = 1,
+#                  area_selection)
 
 # 1g) Environmental data #
 #------------------------#
