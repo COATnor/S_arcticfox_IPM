@@ -70,6 +70,9 @@ if(!dir.exists("Plots")){
 
 ## Load carcass data
 carcass.data.raw <- readr::read_csv(carcass.data.path)
+# --> This gives a warning about some unexpected values that get set to NA. 
+# --> It should not be an issue as it is not data that actually gets used in original analyses.
+# --> We assume that this will be resolved once data is on COAT data portal. 
 
 ## Reformat carcass data
 carcass.data <- reformatData_carcass(Amax = Amax, 
@@ -83,7 +86,8 @@ carcass.data <- reformatData_carcass(Amax = Amax,
 
 ## Extract AaH data from processed carcass data
 AaH.data <- list(C = carcass.data$AaH.mat,
-                 pData = carcass.data$pData)
+                 pLoc = carcass.data$pLoc,
+                 pAgeSex = carcass.data$pAgeSex)
 
 
 

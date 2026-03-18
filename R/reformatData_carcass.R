@@ -64,6 +64,7 @@ reformatData_carcass <- function (Amax, minYear, maxYear,
          Once we move to new data, we should have an option to also do Ny-Ålesund/Kongsfjorden")
   }
   
+  
   #---------------------#
   # AGE-AT-HARVEST DATA #
   #---------------------#
@@ -81,13 +82,15 @@ reformatData_carcass <- function (Amax, minYear, maxYear,
   dimnames(AaH.mat)[[1]] <- 1:Amax
   dimnames(AaH.mat)[[2]] <- unique(carcass.dataF$Trapseason)
 
-  ## Calculate annual proportions of harvested females that were aged
-  aged <- carcass.dataF %>%
-    dplyr::mutate(Aged = ifelse(is.na(AgeClass), 0, 1)) %>%
-    dplyr::group_by(seasonStart_yr) %>%
-    dplyr::summarise(prop = mean(Aged))
   
-  pData <- aged$prop
+  ## Calculate annual proportions of carcasses with assigned area
+  carcass.data$MissingData <- ifelse(is.na(carcass.data$Core_area), 1, 0)
+  pLoc <- unname(table(carcass.data$Session, carcass.data$MissingData, useNA = 'ifany')[,1]/rowSums(table(carcass.data$Session, carcass.data$MissingData, useNA = 'ifany')))
+  
+  ## Calculate annual proportions of core area carcasses that were sexed and aged
+  carcass.core <- subset(carcass.data, Core_area == 1)
+  carcass.core$MissingData <- ifelse(is.na(carcass.core$Sex) | is.na(carcass.core$AgeClass), 1, 0)
+  pAgeSex <- unname(table(carcass.core$Session, carcass.core$MissingData, useNA = 'ifany')[,1]/rowSums(table(carcass.core$Session, carcass.core$MissingData, useNA = 'ifany')))
   
   
   #---------------------#
@@ -130,7 +133,8 @@ reformatData_carcass <- function (Amax, minYear, maxYear,
   
   ## Combine data
   carcassData <- list(AaH.mat = AaH.mat,
-                      pData = pData,
+                      pLoc = pLoc,
+                      pAgeSex = pAgeSex,
                       P1.data = P1.data,
                       P2.data = P2.data)
   
