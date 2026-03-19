@@ -190,7 +190,7 @@ YearInfo <- collate_yearInfo(minYear = minYear,
 #**********************#
 
 ## Define general parameters for setting model priors
-maxPups <- 14 # Maximum number of pups per litter
+maxPups <- 16 # Maximum number of pups per litter
 uLim.N <- 800 # Upper limit for age-specific initial population size
 uLim.Imm <- 3000 # Upper limit for number of immigrants/year
 
@@ -211,8 +211,7 @@ info.priors <- list(maxPups = maxPups,
 # 3a) Write model code #
 #----------------------#
 
-redfox.code <- writeCode_redfoxIPM(indLikelihood.genData = indLikelihood.genData)
-#redfox.code <- writeCode_redfoxIndepMod(indLikelihood.genData = indLikelihood.genData)
+arcticfox.code <- writeCode_arcticfoxIPM()
 
 
 # 3b) Assemble IPM input data #
