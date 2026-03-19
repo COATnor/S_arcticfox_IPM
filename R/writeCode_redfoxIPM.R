@@ -221,7 +221,7 @@ writeCode_arcticfoxIPM <- function(){
       log(mH[1:Amax, t]) <- log(Mu.mH[1:Amax]) + betaHP.mH*HPeriod[t] + epsilon.mH[t]
       
       # Other (natural) mortality hazard rate
-      log(mO[1:Amax, t]) <- log(Mu.mO[1:Amax]) + betaY.mO*(t-12) + betaRC.mO*RdCarcass[t+1] + betaG.mO*Juv[1:Amax]*GooseRep[t] + betaSI.mO*JanJunSeaIceIsfj[t+1] + epsilon.mO[t]
+      log(mO[1:Amax, t]) <- log(Mu.mO[1:Amax]) + betaY.mO*(t-12) + betaRC.mO*RdCarcass[t+1] + betaG.mO*Juv[1:Amax]*GooseRep[t] + betaSI.mO*SeaIceIsfj[t+1] + epsilon.mO[t]
       
       # Survival probability
       S[1:Amax, t] <- exp(-(mH[1:Amax, t] + mO[1:Amax,t]))
@@ -259,7 +259,7 @@ writeCode_arcticfoxIPM <- function(){
     
     for(t in 1:Tmax){
 
-      logit(eta[1:Amax, t]) <- par.b*(par.c - (1:Amax)) + betaY.Psi*(t-12) + betaRC.Psi*RdCarcass[t] +  betaSI.Psi*JanJunSeaIceIsfj[t] + epsilon.Psi[t]
+      logit(eta[1:Amax, t]) <- par.b*(par.c - (1:Amax)) + betaY.Psi*(t-12) + betaRC.Psi*RdCarcass[t] +  betaSI.Psi*SeaIceIsfj[t] + epsilon.Psi[t]
       Psi[1:Amax,t] <- par.a*eta[1:Amax,t] 
     }
     
@@ -279,7 +279,7 @@ writeCode_arcticfoxIPM <- function(){
     
     for(t in 1:(Tmax+1)){
       
-      log(rho[1:Amax, t]) <- log(mean.rho) + a.eff1*(1:Amax) + betaY.rho*(t-12) + betaSI.rho*JanJunSeaIceIsfj[t] + betaRC.rho*RdCarcass[t] + epsilon.rho[t]
+      log(rho[1:Amax, t]) <- log(mean.rho) + a.eff1*(1:Amax) + betaY.rho*(t-12) + betaSI.rho*SeaIceIsfj[t] + betaRC.rho*RdCarcass[t] + epsilon.rho[t]
     }
     
     mean.rho ~ dunif(0, maxPups)
@@ -296,7 +296,7 @@ writeCode_arcticfoxIPM <- function(){
     
     for(t in 1:Tmax){
       S0[t] <- exp(-m0t[t])
-      log(m0t[t]) <- log(-log(Mu.S0)) + betaY.m0*(t-12) + betaRC.m0*RdCarcass[t] + betaSI.m0*JanJunSeaIceIsfj[t] + epsilon.m0[t]
+      log(m0t[t]) <- log(-log(Mu.S0)) + betaY.m0*(t-12) + betaRC.m0*RdCarcass[t] + betaSI.m0*SeaIceIsfj[t] + epsilon.m0[t]
     }
     
     Mu.S0 ~ dunif(0, 1)
@@ -380,7 +380,7 @@ writeCode_arcticfoxIPM <- function(){
     for(t in 1:Tmax){
       RdCarcass[t] ~ dnorm(0, sd = 1)
       GooseRep[t] ~ dnorm(0, sd = 1)
-      JanJunSeaIceIsfj[t] ~ dnorm(0, sd = 1)
+      SeaIceIsfj[t] ~ dnorm(0, sd = 1)
       
     }
     
