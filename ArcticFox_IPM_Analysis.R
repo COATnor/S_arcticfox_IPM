@@ -189,28 +189,20 @@ YearInfo <- collate_yearInfo(minYear = minYear,
 # 2) PRIOR INFORMATION #
 #**********************#
 
-## Parameters/paths for making informative priors for survival based on meta-analysis of literature data
-meta.datafile <- "Data/RedFox_LiteratureData.csv"
-simulateSD <- TRUE
+## Define general parameters for setting model priors
+maxPups <- 14 # Maximum number of pups per litter
+uLim.N <- 800 # Upper limit for age-specific initial population size
+uLim.Imm <- 3000 # Upper limit for number of immigrants/year
 
-## Parameters/paths for making informative priors for natural mortality using Tom Porteus' Hoenig model approach
-mu.t.max <- 22.61062
-hoenig.datafile <- "Data/HoenigMod_Posteriors_fromTomPorteus.txt"
-nsim <- 30
+## Set parameters for defining informative priors
+nrDens_unknown <- 4 # Expected number of unknown/unmonitored dens (defined by expert elicitation)
 
 ## Collate all prior information
-surv.priors <- collate_priorInfo(meta.datafile = meta.datafile,
-                                 simulateSD = simulateSD,
-                                 hoenig.datafile = hoenig.datafile, 
-                                 nsim = nsim, 
-                                 mu.t.max = mu.t.max, 
-                                 maxAge = maxAge_yrs,
-                                 S0.mean.offset = S0.mean.offset,
-                                 S0.sd.factor = S0.sd.factor)
+info.priors <- list(maxPups = maxPups,
+                    uLim.N = uLim.N,
+                    uLim.Imm = uLim.Imm,
+                    nrDens_unknown = nrDens_unknown)
 
-## Define type of prior to use for annual survival
-survPriorType <- definePriorType_AnnSurv(HoenigPrior = HoenigPrior, 
-                                         sPriorSource = sPriorSource)
 
 #****************#
 # 3) MODEL SETUP #
