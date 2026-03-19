@@ -29,6 +29,9 @@ area_selection <- "Advent-/Sassendalen" # Areas to consider
 reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer_v5"
 reindeer.dataset.version <- 5
 
+goose.dataset.name <-"s_geese_nest_nestfate_pinkfootedgoose_v1"
+goose.dataset.version <- 1
+
 COAT_key <- Sys.getenv("COAT_API")
 
 ## Set filepaths for local datasheets
@@ -142,7 +145,7 @@ reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key,
                                        COATdataset.name = reindeer.dataset.name,
                                        COATdataset.version = reindeer.dataset.version)
 
-# Load old reindeer data (only 2012 onwards are on COAR data portal)
+# Load old reindeer data (only 2012 onwards are on COAT data portal)
 reindeer.data.old <- readr::read_csv(reindeer.data.path)
 
 ## Reformat reindeer data
@@ -150,8 +153,29 @@ reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
                                           reindeer.data.old = reindeer.data.old,
                                           prioritiseCOAT = TRUE)
 
+## GOOSE REPRODUCTION
+
+# Download goose data from COAT data portal
+goose.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
+                                    COAT_module = "goose-module",
+                                    COATdataset.name = goose.dataset.name,
+                                    COATdataset.version = goose.dataset.version)
+# --> Not currently usable because information about year is not preserved in collated dataset
+
+# Load goose data from file
+goose.data.ipm <- readr::read_csv(goose.data.path)
+
+# Reformat goose data
+goose.data <- reformatData_gooseCov(goose.data.ipm = goose.data.ipm)
 
 
+## SEA ICE AVAILABILITY
+
+# Load sea ice data from file
+seaIce.data.raw <- readr::read_csv(seaIce.data.path)
+
+# Reformat sea ice data
+seaIce.data <- reformatData_seaIceCov(seaIce.data.raw = seaIce.data.raw)
 
 
 # 1h) Conceptual year information #
