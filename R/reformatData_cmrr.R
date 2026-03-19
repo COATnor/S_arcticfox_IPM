@@ -47,22 +47,36 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   fox <- fox %>%
     dplyr::left_join(indIDs, by = "Tag_ID") 
   
-  ## Transform longitudinal data to multistate CMR data
+  ## Add a column for life stage (juvenile = 1, adult = 2)
+  fox <- fox %>%
+    dplyr::mutate(lifestage = ifelse(Year_first == 1, 1, 2))
+  
+  ## Transform longitudinal data to multistate capture histories
   CH.data <- makeCHs_fromLongitudinal(data = fox, 
                                       session_name = "Session_CMRR_adj", 
                                       id_name = "no", 
                                       state_name = "state", 
-                                      age_name = "Year_first")
+                                      age_name = "lifestage")
   
   CH <- CH.data$ch
-  firstyear <- CH.data$firstyear
-  
+  lifestage <- CH.data$age.ch
   
   ## Compute vector with occasion of first capture
   get.first <- function(x) min(which(x!=0))
   f <- apply(CH, 1, get.first)
   
-  ## Creating capture histories, auxiliary data (known states), and initial values for MCMC
+  ## Complete "lifestage" matrix
+  # (all 0's after first capture are set to 2. Entries before first capture remain 0)
+  for(i in 1:dim(lifestage)[1]){
+    
+    for(t in (f[i]+1):dim(lifestage)[2]){
+      if(lifestage[i,t] == 0){
+        lifestage[i,t] <- 2
+      }
+    }
+  }
+  
+  ## Creating different capture histories, auxiliary data (known states), and initial values for MCMC
   AF_CMRR_data <- function(CH, f){
     
     # CAPTURE HISTORIES (MAIN DATA) - Recaptures and harvest recoveries
@@ -139,7 +153,15 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
     BinitsCH[which(BinitsCH%in%c(2,3))] <- 0
     
     # RETURN OUTPUT
-    output <- list(rrCH = rrCH, rrCH2 = rrCH2, rCH = rCH, dataCH = dataCH, dataCH2 = dataCH2, initsCH = initsCH, initsCH2 = initsCH2, BdataCH = BdataCH, BinitsCH = BinitsCH)
+    output <- list(rrCH = rrCH, 
+                   rrCH2 = rrCH2, 
+                   rCH = rCH, 
+                   dataCH = dataCH, 
+                   dataCH2 = dataCH2, 
+                   initsCH = initsCH, 
+                   initsCH2 = initsCH2, 
+                   BdataCH = BdataCH, 
+                   BinitsCH = BinitsCH)
     return(output)
   }
   
@@ -164,8 +186,23 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   
   CMRR.data$rrCH3 <- rrCH3
   
+  
+  ## Collate all outputs
+  CMRR.data.out <- list(rrCH = CMRR.data$rrCH, 
+                        rrCH2 = CMRR.data$rrCH2, 
+                        rrCH3 = CMRR.data$rrCH3, 
+                        rCH = CMRR.data$rCH, 
+                        dataCH = CMRR.data$dataCH, 
+                        dataCH2 = CMRR.data$dataCH2, 
+                        initsCH = CMRR.data$initsCH, 
+                        initsCH2 = CMRR.data$initsCH2, 
+                        BdataCH = CMRR.data$BdataCH, 
+                        BinitsCH = CMRR.data$BinitsCH,
+                        lifestage = lifestage,
+                        f = f)
+  
   ## Return output
-  return(CMRR.data)
+  return(CMRR.data.out)
   
   }
   

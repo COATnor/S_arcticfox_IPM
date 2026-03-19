@@ -14,5 +14,5 @@ makeCHs_fromLongitudinal <- function(data, session_name, id_name, state_name, ag
     ageCH[data[i, id_name], occasion[i]] <- data[i, age_name]
   }
   
-  return(list(ch = msCH, firstyear = ageCH))
+  return(list(ch = msCH, age.ch = ageCH))
 }
