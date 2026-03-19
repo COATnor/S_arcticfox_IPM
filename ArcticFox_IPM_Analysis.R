@@ -80,7 +80,8 @@ carcass.data.raw <- readr::read_csv(carcass.data.path)
 
 ## Reformat carcass data
 carcass.data <- reformatData_carcass(Amax = Amax, 
-                                     minYear = minYear, maxYear = minYear + Tmax - 1,
+                                     minYear = minYear, 
+                                     maxYear = minYear + Tmax - 1,
                                      area_selection = area_selection,
                                      carcass.data.raw = carcass.data.raw)
 
@@ -118,9 +119,10 @@ cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
 # 1e) Den survey data #
 #---------------------#
 
-## Prepareden survey data
+## Prepare den survey data
 denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
-                              minYear = minYear)
+                              minYear = minYear,
+                              maxYear = minYear + Tmax - 1)
 
 
 # 1f) GPS collar survival data #
@@ -220,23 +222,15 @@ arcticfox.code <- writeCode_arcticfoxIPM()
 input.data <- assemble_inputData(Amax = Amax, 
                                  Tmax = Tmax, 
                                  minYear = minYear,
-                                 maxPups = 14,
-                                 uLim.N = 800,
-                                 uLim.Imm = 3000,
-                                 nLevels.rCov = nLevels.rCov,
-                                 standSpec.rCov = standSpec.rCov,
-                                 poolYrs.genData = poolYrs.genData,
-                                 pImm.type = pImm.type,
-                                 wAaH.data = wAaH.data, 
-                                 sAaH.data = sAaH.data,
-                                 rep.data = rep.data, 
-                                 gen.data = gen.data,
-                                 pup.data = pup.data,
-                                 rodent.data = rodent.data, 
+                                 AaH.data = AaH.data,
+                                 rep.data = rep.data,
+                                 cmrr.data = cmrr.data,
+                                 denS.data = denS.data,
                                  reindeer.data = reindeer.data,
-                                 hunter.data = hunter.data, 
-                                 surv.priors = surv.priors,
-                                 survPriorType = survPriorType)
+                                 goose.data = goose.data,
+                                 seaIce.data = seaIce.data,
+                                 info.priors = info.priors,
+                                 YearInfo = YearInfo)
 
 
 # 3c) Set up for model run (incl. simulating initial values) #

@@ -42,62 +42,68 @@
 #' @examples
 
 assemble_inputData <- function(Amax, Tmax, minYear,
-                               maxPups, uLim.N, uLim.Imm, 
-                               nLevels.rCov = NA, standSpec.rCov,
-                               poolYrs.genData, pImm.type,
-                               wAaH.data, sAaH.data, rep.data, gen.data, pup.data,
-                               rodent.data, reindeer.data, hunter.data, 
-                               surv.priors, survPriorType,
-                               save = FALSE){
+                               AaH.data = AaH.data,
+                               rep.data = rep.data,
+                               cmrr.data = cmrr.data,
+                               denS.data = denS.data,
+                               reindeer.data = reindeer.data,
+                               goose.data = goose.data,
+                               seaIce.data = seaIce.data,
+                               info.priors = info.priors,
+                               YearInfo = YearInfo){
   
   ## Select relevant years from observational data
   
-  # Winter Age-at-Harvest data
-  C_w <- wAaH.data$C[,which(colnames(wAaH.data$C) == minYear) + 1:Tmax - 1]
-  pData_w <- wAaH.data$pData[which(colnames(wAaH.data$C) == minYear) + 1:Tmax - 1]
+  # Set max year
+  maxYear <- minYear + Tmax
   
-  # Summer Age-at-Harvest data
-  C_s <- sAaH.data$C
-  pData_s <- sAaH.data$pData
-  XsH <- length(pData_s)
-  sH_year <- as.numeric(colnames(C_s)) - minYear + 1
+  # Age-at-Harvest data
+  C.start <- min(which(grepl(minYear, colnames(AaH.data$C))))
+  C.end <- max(which(grepl((maxYear-1), colnames(AaH.data$C))))
+  
+  C <- AaH.data$C[,C.start:C.end]
+  pLoc <- AaH.data$pLoc[C.start:C.end]
+  pAgeSex <- AaH.data$pAgeSex[C.start:C.end]
   
   # Reproduction data
-  P1 <- subset(rep.data$P1, repryear %in% c(minYear + 0:Tmax))
-  P2 <- subset(rep.data$P2, repryear %in% c(minYear + 0:Tmax))
+  P1 <- subset(rep.data$P1, P1_year %in% 1:Tmax)
+  P2 <- subset(rep.data$P2, P2_year %in% 1:Tmax)
+  
+  # Mark-recovery data
+  # --> Already contains only relevant years. 
+  # TODO: May want to include an explicit filter in the reformatting function to enforce this also in cases where unorthodox time periods are used. 
+  
+  # Den survey data
+  # --> Already contains only relevant years (filtered in reformatting function).
   
   
-  ## Select relevant categorical rodent covariate
-  if(is.na(nLevels.rCov)){
-    RodentIndex <- NA
-    RodentIndex2 <- NA
-  }else{
-    
-    if(nLevels.rCov == 2){
-      RodentIndex <- rodent.data$cat2.wintvar
-      RodentIndex2 <- rodent.data$cat2.fallstor
-    }else{
-      #RodentIndex <- rodent.data$cat3
-      stop("3 level rodent covariate not currently supported")
-    }
-  }
+  ## Select relevant environmental covariates (incl. time periods)
+  RdCarcass_orig <- subset(reindeer.data, year %in% minYear:maxYear)$reindeer_carcass
+  GooseRep_orig <- subset(goose.data, year %in% minYear:maxYear)$prop_goose_juv
+  SeaIceIsfj_orig <- subset(seaIce.data, year %in% minYear:maxYear)$IFSI.meanJanJun
   
-  ## Select relevant continuous rodent covariate
-  if(standSpec.rCov){
-    RodentAbundance <- rodent.data$cont.wintvar.stsp
-  }else{
-    RodentAbundance <- rodent.data$cont.wintvar
-  }
   
-  if(standSpec.rCov){
-    RodentAbundance2 <- rodent.data$cont.fallstor.stsp
-  }else{
-    RodentAbundance2 <- rodent.data$cont.fallstor
-  }
+  ## Detrend and scale environmental covariates
+  RdCarcass_prep <- SpecsVerification::Detrend(RdCarcass_orig)
+  GooseRep_prep <- SpecsVerification::Detrend(GooseRep_orig)
+  SeaIceIsfj_prep <- SpecsVerification::Detrend(SeaIceIsfj_orig)
   
-  ## Select relevant reindeer covariates
-  Reindeer <- reindeer.data$RDcarcass
-
+  RdCarcass <- as.numeric(scale(RdCarcass_prep))
+  GooseRep <- as.numeric(scale(GooseRep_prep))
+  SeaIceIsfj <- as.numeric(scale(SeaIceIsfj_prep))
+  
+  envCov.metadata <- data.frame(
+    covariate = c("RdCarcass", "GooseRep", "SeaIceIsfj"),
+    original_mean = c(mean(RdCarcass_orig, na.rm = TRUE), mean(GooseRep_orig, na.rm = TRUE), mean(SeaIceIsfj_orig, na.rm = TRUE)),
+    original_sd = c(sd(RdCarcass_orig, na.rm = TRUE), sd(GooseRep_orig, na.rm = TRUE), sd(SeaIceIsfj_orig, na.rm = TRUE)),
+    detrended_mean = c(mean(RdCarcass_prep, na.rm = TRUE), mean(GooseRep_prep, na.rm = TRUE), mean(SeaIceIsfj_prep, na.rm = TRUE)),
+    detrended_sd = c(sd(RdCarcass_prep, na.rm = TRUE), sd(GooseRep_prep, na.rm = TRUE), sd(SeaIceIsfj_prep, na.rm = TRUE))
+  )
+  
+  
+  ## Make harvest period covariate
+  
+  
   ## List all relevant data (split into data and constants as used by NIMBLE)
   # Data
   nim.data <- list(
@@ -148,49 +154,10 @@ assemble_inputData <- function(Amax, Tmax, minYear,
     nLevels.rCov = nLevels.rCov
   )
   
-  ## Append relevant data from genetic immigration assignments
-  if(poolYrs.genData){
-    
-    nim.data$pImm <- dplyr::case_when(pImm.type == "original" ~ gen.data$pImm,
-                                      pImm.type == "rescaled" ~ gen.data$pImm_rescaled,
-                                      pImm.type == "LL-based" ~ gen.data$pImm_LL)
-    nim.constants$Xgen <- gen.data$Xgen
-    
-    nim.data$genObs_Imm <- gen.data$genObs_Imm
-    nim.data$genObs_Res <- gen.data$genObs_Res
-    
-  }else{
-    nim.data$pImm <- dplyr::case_when(pImm.type == "original" ~ gen.data$pImm_in,
-                                      pImm.type == "rescaled" ~ gen.data$pImm_rescaled_in,
-                                      pImm.type == "LL-based" ~ gen.data$pImm_LL_in)
-    nim.data$pImm_pre <- dplyr::case_when(pImm.type == "original" ~ gen.data$pImm_pre,
-                                          pImm.type == "rescaled" ~ gen.data$pImm_rescaled_pre,
-                                          pImm.type == "LL-based" ~ gen.data$pImm_LL_pre)
-    nim.constants$Xgen <- gen.data$Xgen_in
-    nim.constants$Xgen_pre <- gen.data$Xgen_pre
-    nim.constants$pImm_yrs <- gen.data$pImm_yrsB_in
-    nim.constants$pImm_yrs_pre <- gen.data$pImm_yrsB_pre
-    
-    nim.constants$Tmax_Gen <- max(nim.constants$pImm_yrs)
-    nim.constants$Tmax_Gen_pre <- max(nim.constants$pImm_yrs_pre)
-    
-    nim.data$genObs_Imm <- gen.data$genObs_Imm_in
-    nim.data$genObs_Imm_pre <- gen.data$genObs_Imm_pre
-    nim.data$genObs_Res <- gen.data$genObs_Res_in
-    nim.data$genObs_Res_pre <- gen.data$genObs_Res_pre
-    
-    
-  }
   
   ## Add relevant prior information
   nim.constants <- c(nim.constants, surv.priors$earlySurv)
   
-  if(survPriorType$Parameter == "natMort"){
-    nim.constants <- c(nim.constants, surv.priors$natMort)
-  }else{
-    sublistIdx <- which(names(surv.priors$annSurv) == survPriorType$Source)
-    nim.constants <- c(nim.constants, surv.priors$annSurv[sublistIdx][[1]])
-  }
   
   ## Combine data and constants in a list
   inputData <- list(nim.data = nim.data, 
