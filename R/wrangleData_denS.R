@@ -3,14 +3,15 @@
 #' @param datapath character string with the path to the file containing the
 #' data. 
 #' @param minYear integer. The first year to consider in the analyses. 
-#'
+#' @param maxYear integer. The last year to consider in the analyses.'
+#' 
 #' @return a list containing vector-format data on numbers of monitored and 
 #' occupied dens, as well as observed numbers of pups across years. 
 #' @export
 #'
 #' @examples
 #' 
-wrangleData_denS <- function(datapath, minYear){
+wrangleData_denS <- function(datapath, minYear, maxYear){
   
   ## Load data file
   denData <- readr::read_csv(datapath)
@@ -34,9 +35,10 @@ wrangleData_denS <- function(datapath, minYear){
                   Breeding = ifelse(is.na(NoPups), NA, ifelse(NoPups > 0, 1, 0)),
                   Monitoring = ifelse(is.na(NoPups), 0, 1))
 
-  ## Remove the year with missing data (1996)
+  ## Remove the year with missing data (1996) and subset to relevant time period
   denS2 <- denS2 %>%
-    dplyr::filter(Year != 1996)
+    dplyr::filter(Year != 1996) %>%
+    dplyr::filter(between(Year, minYear, maxYear))
   
   ## Calculate yearly summaries (no. of dens monitored, no. of dens occupied, mean no. of pups observed)
   denS_sum <- denS2 %>%
