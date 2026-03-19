@@ -315,7 +315,7 @@ summarize_fox_data <- function(data,output_dir = "fox_boxplots") {
     ungroup() %>% 
     # Convert month_year to a proper date format for sorting
     mutate(area            = na_if(area, ""),
-      month_year_date = parse_date_time(month_year, orders = "my")) %>%
+           month_year_date = parse_date_time(month_year, orders = "my")) %>%
     # Arrange by Fox_PTT and month_year_date
     arrange(ID_PTT, month_year_date) %>%
     # Drop the temporary sorting column
@@ -333,13 +333,18 @@ summarize_fox_data <- function(data,output_dir = "fox_boxplots") {
         by = "month"
       )
     ) %>%
+    fill(
+      ID_Fox, Fox_PTT_year, Sex, Age, Weight,
+      area_capture, Date_deploy, Date_death,
+      Date_death_est, Last_date_alive, LAT_N, LON_E,
+      .direction = "downup"   # fills both down AND up to catch leading NAs
+    ) %>%
     ungroup() %>%
-    # Recreate the month_year column for display
-    mutate(month_year = paste0(month(month_year_date, label = TRUE, abbr = TRUE), "-", year(month_year_date))) %>%
-    # Arrange by Fox_PTT and month_year_date
+    mutate(month_year = paste0(month(month_year_date, label = TRUE, abbr = TRUE),
+                               "-", year(month_year_date))) %>%
     arrange(ID_PTT, month_year_date) %>%
-    # Drop the temporary sorting column
     dplyr::select(-month_year_date)
+  
   
   # --- Generate and Save Combined Boxplots ---
   
@@ -401,6 +406,9 @@ summary_table <- summarize_fox_data(Foxes_Locs_raw_formatted)
 
 dim(summary_table)
 length(unique(summary_table$ID_PTT))##93
+length(which(is.na(summary_table$ID_PTT)))##0
+length(which(is.na(summary_table$ID_Fox)))##0
+
 
 
 ############################################################################
