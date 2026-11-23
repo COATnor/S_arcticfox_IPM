@@ -340,15 +340,16 @@ MCMCvis::MCMCtrace(IPM.out)
 # 5) MODEL COMPARISONS #
 ########################
 
-## Simplified models
+## Original vs. new setup
 compareModels(Amax = Amax, 
               Tmax = Tmax, 
               minYear = minYear, 
-              post.filepaths = c("AF_IPM.rds", 
-                                 "AF_IPM_logImm.rds"), 
+              post.filepaths = c("Results_Original/AF_IPM.rds", 
+                                 "ArcticFoxIPM_newSetup.rds"), 
               model.names = c("Original", 
-                              "logNormal Immigration dist."), 
-              plotFolder = "Plots/Comp_ImmDistributions")
+                              "New setup"), 
+              model.versions = c("old", "new"),
+              plotFolder = "Plots/Comp_newSetup")
 
 
 ###########################################

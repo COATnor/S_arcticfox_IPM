@@ -14,6 +14,8 @@
 #' in mcmc.list format. Can be procided instead of post.filepaths. 
 #' @param model.names character vector with user-defined names for models to 
 #' compare. 
+#' @param model.versions character vector indicating whether each model uses the
+#' old or new NIMBLE code ("old" or "new"). Defaults to "new".
 #' @param plotFolder character string containing the path to the folder in which
 #' to store comparison plots.  
 #' @param returnSumData logical. If TRUE, returns a data frame containing 
@@ -29,7 +31,8 @@
 compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE, 
                           post.filepaths, post.list, 
                           model.names,
-                          plotFolder, returnSumData = FALSE){
+                          plotFolder, returnSumData = FALSE,
+                          model.versions = rep("new", length(model.names))){
   
   ## Check models are specified correctly
   if((missing(post.filepaths) & missing(post.list)) |
@@ -46,6 +49,10 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   ## Count number of models
   nModels <- length(model.names)
   
+  if(length(model.versions) != nModels | !all(model.versions %in% c("old", "new"))){
+    stop("model.versions must contain one 'old' or 'new' value per model.")
+  }
+  
   ## Set maxYear if not provided
   if(missing(maxYear)){
     maxYear <- minYear + Tmax - 1
@@ -60,6 +67,28 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
       samples <- as.matrix(post.list[[i]])
     }else{
       samples <- as.matrix(readRDS(post.filepaths[i]))
+    }
+    
+    # Match parameter names and age-class indices from the old model to the new model
+    if(model.versions[i] == "old"){
+      colnames(samples)[colnames(samples) == "S0"] <- "Mu.S0"
+      colnames(samples) <- sub("^S0t\\[", "S0[", colnames(samples))
+      
+      for(par in c("S", "mH", "mO", "h", "alpha", "Mu.mH", "Mu.mO")){
+        old.cols <- grep(paste0("^", gsub(".", "\\.", par, fixed = TRUE), "\\["), colnames(samples))
+        if(length(old.cols) > 0){
+          old.names <- colnames(samples)[old.cols]
+          old.age <- as.numeric(sub("^[^[]+\\[([0-9]+).*", "\\1", old.names))
+          
+          for(a in 1:Amax){
+            idx <- which(old.age == ifelse(a == 1, 2, 1))
+            new.samples <- samples[, old.cols[idx], drop = FALSE]
+            colnames(new.samples) <- sub("\\[[12]", paste0("[", a), old.names[idx])
+            samples <- cbind(samples, new.samples)
+          }
+          samples <- samples[, -old.cols, drop = FALSE]
+        }
+      }
     }
     
     # Change format and add to list
@@ -97,16 +126,12 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
                                             !is.na(Idx1) & grepl("Mu", Parameter) ~ Idx1),
                   Year = YearIdx + minYear - 1,
                   Age = ifelse(AgeIdx == Amax, paste0(Amax-1, "+"), AgeIdx-1),
-                  ParamName = stringr::word(Parameter, 1, sep = "\\[")) %>%
-    
-    dplyr::mutate(Age = dplyr::case_when(!(ParamName %in% c("Mu.mH", "Mu.mO", "mH", "mO")) ~ Age,
-                                         AgeIdx == 1 ~ "Adult",
-                                         AgeIdx == 2 ~ "Juvenile"))
-    
-    
+                  ParamName = stringr::word(Parameter, 1, sep = "\\["))
+  
+  
   sum.data <- sum.data %>%
     dplyr::left_join(idx.data, by = "Parameter")
-    
+  
   ## Set parameter groups for plotting posterior density overlaps
   plot.params <- list(
     VRmeans = c(paste0("Mu.mH[", 1:Amax, "]"),
@@ -114,7 +139,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
                 paste0("Mu.Psi[", 2:Amax, "]"), 
                 paste0("Mu.rho[", 2:Amax, "]"), 
                 "par.a", "par.b", "par.c", "a.eff1",
-                "S0", "avgImm"),
+                "Mu.S0", "avgImm"),
     
     VReffects = c("sigma.mH", "sigma.mO", 
                   "sigma.Psi", "sigma.rho", 
@@ -124,7 +149,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
                   "betaRC.rho", "betaSI.rho", "betaY.rho",
                   "betaRC.m0", "betaSI.m0", "betaY.m0",
                   "betaY.mO", "betaRC.mO", "betaG.mO", "betaSI.mO"
-                  ),
+    ),
     
     Imm = paste0("Imm[", 1:Tmax, "]"),
     
@@ -141,7 +166,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
     ParamLabels = c("Natural mortality", "Survival", 
                     "Harvest mortality", "Pregnancy rate", "# fetuses/female")
   )
-
+  
   plotTS.params <- list(
     ParamNames = c("N.tot", "B.tot", "R.tot", "m0t", "Imm"),
     ParamLabels = c("Female population size", "# breeding females", "# female recruits", 
@@ -150,7 +175,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   
   ## Optional: convert population size estimates to log scale
   if(logN){
-  
+    
     ## Entire posterior samples
     popN.params <- c(plot.params$Imm, plot.params$Ntot, plot.params$Btot, plot.params$Rtot)
     
@@ -169,7 +194,7 @@ compareModels <- function(Amax, Tmax, minYear, maxYear, logN = FALSE,
   
   ## Set plotting colors
   plot.cols <- paletteer::paletteer_c("grDevices::Temps", length(model.names))
-
+  
   ## Plot posterior overlaps
   pdf(paste0(plotFolder, "/PosteriorDensities.pdf"), width = 9, height = 6)
   for(x in 1:length(plot.params)){
