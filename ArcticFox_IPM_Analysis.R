@@ -192,8 +192,8 @@ YearInfo <- collate_yearInfo(minYear = minYear,
 
 ## Define general parameters for setting model priors
 maxPups <- 16 # Maximum number of pups per litter
-uLim.N <- 800 # Upper limit for age-specific initial population size
-uLim.Imm <- 3000 # Upper limit for number of immigrants/year
+uLim.N <- 400 # Upper limit for age-specific initial population size
+uLim.Imm <- 400 # Upper limit for number of immigrants/year
 
 ## Set parameters for defining informative priors
 nrDens_unknown <- 4 # Expected number of unknown/unmonitored dens (defined by expert elicitation)
