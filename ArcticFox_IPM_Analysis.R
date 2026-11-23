@@ -1,12 +1,10 @@
 library(ggplot2)
 library(nimble)
-library(sf)
 library(reshape2)
 library(remotes)
 library(ckanr)
 library(purrr)
 library(dplyr)
-library(metafor)
 library(patchwork)
 library(coda)
 
