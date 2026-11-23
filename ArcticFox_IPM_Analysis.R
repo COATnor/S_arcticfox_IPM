@@ -59,6 +59,9 @@ if(!dir.exists("Plots")){
   dir.create("Plots")
 }
 
+## Test run
+testRun <- TRUE 
+
 ## Set "switches" for running different model versions
 # --> TBA as need arises
 
