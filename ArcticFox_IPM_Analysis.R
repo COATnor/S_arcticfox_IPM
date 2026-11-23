@@ -140,10 +140,11 @@ gps.metadata <- readr::read_csv(gps.metadata.path)
 ## REINDEER CARCASSES
 
 # Download reindeer data from COAT data portal
-reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-                                       COAT_module = "ungulate-module",
-                                       COATdataset.name = reindeer.dataset.name,
-                                       COATdataset.version = reindeer.dataset.version)
+# reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
+#                                        COAT_module = "ungulate-module",
+#                                        COATdataset.name = reindeer.dataset.name,
+#                                        COATdataset.version = reindeer.dataset.version)
+# --> Currently not working due to an issue connecting to COAT data portal
 
 # Load old reindeer data (only 2012 onwards are on COAT data portal)
 reindeer.data.old <- readr::read_csv(reindeer.data.path)
@@ -218,18 +219,79 @@ arcticfox.code <- writeCode_arcticfoxIPM()
 # 3b) Assemble IPM input data #
 #-----------------------------#
 
-input.data <- assemble_inputData(Amax = Amax, 
-                                 Tmax = Tmax, 
-                                 minYear = minYear,
-                                 AaH.data = AaH.data,
-                                 rep.data = rep.data,
-                                 cmrr.data = cmrr.data,
-                                 denS.data = denS.data,
-                                 reindeer.data = reindeer.data,
-                                 goose.data = goose.data,
-                                 seaIce.data = seaIce.data,
-                                 info.priors = info.priors,
-                                 YearInfo = YearInfo)
+## Load old input data
+input.data.old <- readRDS("AF_IPM_Data.rds")
+
+## Recode life stage variable 
+lifestage <- ifelse(input.data.old$firstyear == 0, 2, input.data.old$firstyear)
+for(i in 1:nrow(lifestage)){
+  
+  if(input.data.old$first[i] > 1){
+    for(t in 1:(input.data.old$first[i]-1)){
+      lifestage[i, t] <- 0
+    } 
+  }
+}
+
+## Assemble nimble data and constants
+IPM.data <- list(
+  C = input.data.old$C,
+  y = input.data.old$y.CMR, 
+  P1 = input.data.old$P1,
+  P2 = input.data.old$P2,
+  NoOcc = input.data.old$NoOcc, NoMon=input.data.old$NoMon, 
+  NoPups = input.data.old$NoPups, 
+  RdCarcass = input.data.old$RdCarcass, 
+  WinterTemp = input.data.old$MeanWinterTemp, 
+  GooseRep = input.data.old$GooseJuvProp,
+  #JanJunSeaIceIsfj = input.data.old$JanJunSeaIceIsfj,
+  SeaIceIsfj = input.data.old$JanJunSeaIceIsfj,
+  HPeriod = c(rep(0, 12), rep(1, 11)))
+
+
+IPM.constants <- list(
+  Amax = input.data.old$A, 
+  Juv = c(1, rep(0, input.data.old$A - 1)),
+  Tmax = input.data.old$Tmax, 
+  TmaxC = input.data.old$TmaxC, 
+  TmaxD = input.data.old$TmaxD,
+  n.occasions = input.data.old$n.occasions, 
+  nind = input.data.old$nind, 
+  first = input.data.old$first, 
+  #firstyear = input.data.old$firstyear, 
+  lifestage = lifestage,
+  X1 = input.data.old$X1,  
+  P1_age = input.data.old$P1_age, 
+  P1_year = input.data.old$P1_year,
+  X2 = input.data.old$X2, 
+  P2_age = input.data.old$P2_age, 
+  P2_year = input.data.old$P2_year,
+  X3 = input.data.old$X3,
+  DS_year = input.data.old$DS_year, 
+  k.Dens = input.data.old$k.Dens,
+  pAgeSex = input.data.old$pAgeSex, 
+  pLoc = input.data.old$pLoc,
+  uLim.N = uLim.N,
+  uLim.Imm = uLim.Imm,
+  maxPups = maxPups,
+  nrDens_unknown = nrDens_unknown)
+
+
+input.data <- list(IPM.data = IPM.data,
+                   IPM.constants = IPM.constants)
+
+# input.data <- assemble_inputData(Amax = Amax, 
+#                                  Tmax = Tmax, 
+#                                  minYear = minYear,
+#                                  AaH.data = AaH.data,
+#                                  rep.data = rep.data,
+#                                  cmrr.data = cmrr.data,
+#                                  denS.data = denS.data,
+#                                  reindeer.data = reindeer.data,
+#                                  goose.data = goose.data,
+#                                  seaIce.data = seaIce.data,
+#                                  info.priors = info.priors,
+#                                  YearInfo = YearInfo)
 
 
 # 3c) Set up for model run (incl. simulating initial values) #
