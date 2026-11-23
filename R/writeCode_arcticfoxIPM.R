@@ -81,21 +81,16 @@ writeCode_arcticfoxIPM <- function(){
     # h = age- and time-dependent probability of dying from hunting
     
     ### Data:
-    # C_w = age-at-harvest matrix
+    # C = age-at-harvest matrix
     # pAgeSex = annual proportion of carcasses from core area with complete age/sex info
     # pLoc = annual proportion of carcasses with information on location
     
     ### Likelihood
     
     for(t in 1:TmaxC){
-      
-      # Age class 1 (juveniles)
-      C[1, t] ~ dbin(h[2, t]*pAgeSex[t]*pLoc[t], N[1, t])
-      
-      # Age classes 2 to 5+ (adults)
-      for(a in 2:Amax){
+      for(a in 1:Amax){
         
-        C[a, t] ~ dbin(h[1, t]*pAgeSex[t]*pLoc[t], N[a, t])
+        C[a, t] ~ dbin(h[a, t]*pAgeSex[t]*pLoc[t], N[a, t])
       }
     }
     
@@ -236,8 +231,8 @@ writeCode_arcticfoxIPM <- function(){
     # Median mortality hazard rates
     
     for(a in 1:2){
-      Mu.mH[a] ~ dunif(0, 5)
-      Mu.mO[a] ~ dunif(0, 5)
+      Mu.mH[a] ~ dunif(0.01, 3)
+      Mu.mO[a] ~ dunif(0.01, 3)
     }
     
     Mu.mH[3:Amax] <- Mu.mH[2]
@@ -277,7 +272,7 @@ writeCode_arcticfoxIPM <- function(){
     
     ## Litter size
     
-    for(t in 1:(Tmax+1)){
+    for(t in 1:Tmax){
       
       log(rho[1:Amax, t]) <- log(mean.rho) + a.eff1*(1:Amax) + betaY.rho*(t-12) + betaSI.rho*SeaIceIsfj[t] + betaRC.rho*RdCarcass[t] + epsilon.rho[t]
     }
@@ -314,17 +309,21 @@ writeCode_arcticfoxIPM <- function(){
     Imm[1] <- 0
     
     for(t in 2:Tmax){
-      Imm[t] <- round(ImmT[t])
-      ImmT[t] ~ dlnorm(meanlog = log(Mu.Imm), sdlog = logsigma.Imm) 
+      
+      Imm[t] ~ dpois(ImmT[t])
+      ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
+      #ImmT[t] ~ T(dnorm(avgImm, sd = sigma.Imm), 0, )
+      
+      #Imm[t] <- round(ImmT[t])
+      #ImmT[t] ~ dlnorm(meanlog = log(Mu.Imm), sdlog = logsigma.Imm) 
     }
     
-    Mu.Imm ~ dunif(1, uLim.Imm)
-    logsigma.Imm ~ dunif(0, 10)
+    avgImm ~ dunif(0, uLim.Imm)
+    sigma.Imm ~ dunif(0, 200)
     
-    # Derivation of immigration rates
-    immR[1:Tmax] <- Imm[1:Tmax] / R.tot[1:Tmax]
-      
-  
+    #Mu.Imm ~ dunif(1, uLim.Imm)
+    #logsigma.Imm ~ dunif(0, 10)
+
     
     #---------------------------------------------------------------------------------------------
     
