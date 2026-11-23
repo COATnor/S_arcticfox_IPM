@@ -300,25 +300,16 @@ input.data <- list(IPM.data = IPM.data,
 # 3c) Set up for model run (incl. simulating initial values) #
 #------------------------------------------------------------#
 
-model.setup <- setupModel(modelCode = redfox.code, 
-                          nim.data = input.data$nim.data, 
-                          nim.constants = input.data$nim.constants, 
-                          minN1 = c(600, 50, 50, 50, 50), 
-                          maxN1 = c(800, 400, 400, 400, 400), 
-                          minImm = 50, 
-                          maxImm = 600,
-                          fitCov.mH = fitCov.mH, 
-                          fitCov.mO = fitCov.mO,
-                          fitCov.Psi = fitCov.Psi, 
-                          fitCov.rho = fitCov.rho,
-                          fitCov.immR = fitCov.immR,
-                          rCov.idx = rCov.idx,
-                          mO.varT = mO.varT,
-                          HoenigPrior = HoenigPrior,
-                          imm.asRate = imm.asRate,
-                          testRun = FALSE,
-                          initVals.seed = mySeed
-)
+model.setup <- setupModel(modelCode = arcticfox.code, 
+                          nim.data = input.data$IPM.data, 
+                          nim.constants = input.data$IPM.constants, 
+                          z_inits = input.data.old$initsCH.CMR,
+                          minN1 = c(600, 50, 50, 50, 50), # Not in use
+                          maxN1 = c(800, 400, 400, 400, 400), # Not in use
+                          minImm = 50, # Not in use
+                          maxImm = 600, # Not in use
+                          testRun = testRun,
+                          initVals.seed = mySeed)
 
 
 ####################
@@ -327,8 +318,8 @@ model.setup <- setupModel(modelCode = redfox.code,
 
 t1 <- Sys.time()
 IPM.out <- nimbleMCMC(code = model.setup$modelCode,
-                      data = input.data$nim.data, 
-                      constants = input.data$nim.constants,
+                      data = input.data$IPM.data, 
+                      constants = input.data$IPM.constants,
                       inits = model.setup$initVals, 
                       monitors = model.setup$modelParams,
                       nchains = model.setup$mcmcParams$nchains, 
@@ -336,13 +327,13 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
                       nburnin = model.setup$mcmcParams$nburn, 
                       thin = model.setup$mcmcParams$nthin, 
                       samplesAsCodaMCMC = TRUE, 
-                      setSeed = 0)
+                      setSeed = rep(mySeed, model.setup$mcmcParams$nchains))
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "RedFoxIPM_main_singleCensus_combHarvest2.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup.rds") 
 
-#MCMCvis::MCMCtrace(IPM.out)
+MCMCvis::MCMCtrace(IPM.out)
 
 
 ########################
