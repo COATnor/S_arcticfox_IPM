@@ -24,8 +24,8 @@ minYear <- 1997 # First year to consider
 area_selection <- "Advent-/Sassendalen" # Areas to consider
 
 ## Set COAT dataset names, versions, and directories, and access
-reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer_v5"
-reindeer.dataset.version <- 5
+reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer_v6"
+reindeer.dataset.version <- 6
 
 goose.dataset.name <-"s_geese_nest_nestfate_pinkfootedgoose_v1"
 goose.dataset.version <- 1
@@ -149,17 +149,18 @@ reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key,
 reindeer.data.old <- readr::read_csv(reindeer.data.path)
 
 ## Reformat reindeer data
-reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
-                                          reindeer.data.old = reindeer.data.old,
-                                          prioritiseCOAT = TRUE)
+# reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
+#                                           reindeer.data.old = reindeer.data.old,
+#                                           prioritiseCOAT = TRUE)
+reindeer.data <- reformatData_reindeerCov(reindeer.data.old = reindeer.data.old)
 
 ## GOOSE REPRODUCTION
 
 # Download goose data from COAT data portal
-goose.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-                                    COAT_module = "goose-module",
-                                    COATdataset.name = goose.dataset.name,
-                                    COATdataset.version = goose.dataset.version)
+# goose.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
+#                                     COAT_module = "goose-module",
+#                                     COATdataset.name = goose.dataset.name,
+#                                     COATdataset.version = goose.dataset.version)
 # --> Not currently usable because information about year is not preserved in collated dataset
 
 # Load goose data from file

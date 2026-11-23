@@ -15,40 +15,48 @@
 #'
 #' @examples
 #' 
-reformatData_reindeerCov <- function(reindeer.data.raw, reindeer.data.old, prioritiseCOAT = TRUE){
+reformatData_reindeerCov <- function(reindeer.data.raw = NULL, reindeer.data.old, prioritiseCOAT = TRUE){
   
-  ## Summarize COAT data -> calculate counts of carcasses per year
-  reindeer.counts <- reindeer.data.raw %>%
-    dplyr::mutate(t_date = as.Date(t_date, format = "%Y-%m-%d"),  # convert to Date
-                  year = lubridate::year(t_date)) %>%
-    dplyr::group_by(year) %>%
-    dplyr::summarise(n = n(), .groups = "drop") %>%
-    dplyr::filter(!is.na(year))
-  
-  ## Combine old and new data
-  reindeer.data <- reindeer.data.old %>%
-    dplyr::select(year, reindeer_carcass) %>%
-    dplyr::full_join(reindeer.counts, by = "year") %>%
-    dplyr::rename(reindeer_carcass_old = "reindeer_carcass",
-                  reindeer_carcass_COAT = "n")
-  
-  ## Define variable for use in analyses
-  if(prioritiseCOAT){
+  if(!is.null(reindeer.data.raw)){
     
-    reindeer.data <- reindeer.data %>%
-      dplyr::mutate(reindeer_carcass = dplyr::case_when(
-        !is.na(reindeer_carcass_COAT) ~ reindeer_carcass_COAT,
-        is.na(reindeer_carcass_COAT) & !is.na(reindeer_carcass_old) ~ reindeer_carcass_old,
-        TRUE ~ NA_real_))
+    ## Summarize COAT data -> calculate counts of carcasses per year
+    reindeer.counts <- reindeer.data.raw %>%
+      dplyr::mutate(t_date = as.Date(t_date, format = "%Y-%m-%d"),  # convert to Date
+                    year = lubridate::year(t_date)) %>%
+      dplyr::group_by(year) %>%
+      dplyr::summarise(n = n(), .groups = "drop") %>%
+      dplyr::filter(!is.na(year))
     
+    ## Combine old and new data
+    reindeer.data <- reindeer.data.old %>%
+      dplyr::select(year, reindeer_carcass) %>%
+      dplyr::full_join(reindeer.counts, by = "year") %>%
+      dplyr::rename(reindeer_carcass_old = "reindeer_carcass",
+                    reindeer_carcass_COAT = "n")
+    
+    ## Define variable for use in analyses
+    if(prioritiseCOAT){
+      
+      reindeer.data <- reindeer.data %>%
+        dplyr::mutate(reindeer_carcass = dplyr::case_when(
+          !is.na(reindeer_carcass_COAT) ~ reindeer_carcass_COAT,
+          is.na(reindeer_carcass_COAT) & !is.na(reindeer_carcass_old) ~ reindeer_carcass_old,
+          TRUE ~ NA_real_))
+      
+    }else{
+      
+      reindeer.data <- reindeer.data %>%
+        dplyr::mutate(reindeer_carcass = dplyr::case_when(
+          !is.na(reindeer_carcass_old) ~ reindeer_carcass_old,
+          is.na(reindeer_carcass_old) & !is.na(reindeer_carcass_COAT) ~ reindeer_carcass_COAT,
+          TRUE ~ NA_real_))
+    }
   }else{
     
-    reindeer.data <- reindeer.data %>%
-      dplyr::mutate(reindeer_carcass = dplyr::case_when(
-        !is.na(reindeer_carcass_old) ~ reindeer_carcass_old,
-        is.na(reindeer_carcass_old) & !is.na(reindeer_carcass_COAT) ~ reindeer_carcass_COAT,
-        TRUE ~ NA_real_))
+    reindeer.data <- reindeer.data.old %>%
+      dplyr::select(year, reindeer_carcass)
   }
+
   
   ## Return data
   return(reindeer.data)
