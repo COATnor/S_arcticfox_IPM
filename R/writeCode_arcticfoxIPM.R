@@ -311,8 +311,8 @@ writeCode_arcticfoxIPM <- function(){
     for(t in 2:Tmax){
       
       Imm[t] ~ dpois(ImmT[t])
-      ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
-      #ImmT[t] ~ T(dnorm(avgImm, sd = sigma.Imm), 0, )
+      #ImmT[t] ~ dnorm(avgImm, sd = sigma.Imm)
+      ImmT[t] ~ T(dnorm(avgImm, sd = sigma.Imm), 0, )
       
       #Imm[t] <- round(ImmT[t])
       #ImmT[t] ~ dlnorm(meanlog = log(Mu.Imm), sdlog = logsigma.Imm) 

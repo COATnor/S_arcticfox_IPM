@@ -331,7 +331,7 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_fullInit.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_ImmT_tNormal.rds") 
 
 MCMCvis::MCMCtrace(IPM.out)
 
