@@ -78,7 +78,7 @@ simulateInitVals <- function(nim.data, nim.constants, z_inits,
   
   ## Immigration
   avgImm <- runif(1, minImm, maxImm)
-  sigma.Imm <- runif(1, 10, 40)
+  sigma.Imm <- ifelse(nim.constants$logN_Imm, runif(1, 0.1, 0.4), runif(1, 10, 40))
   
   # Mu.Imm <- runif(1, minImm, maxImm)
   # logsigma.Imm <- sd(log(truncnorm::rtruncnorm(10000, a = 0, b = maxImm, mean = Mu.Imm, sd = sigma.Imm)))

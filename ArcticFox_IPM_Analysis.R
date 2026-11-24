@@ -63,8 +63,10 @@ if(!dir.exists("Plots")){
 testRun <- TRUE 
 
 ## Set "switches" for running different model versions
-# --> TBA as need arises
 
+## Lognormal vs. truncated normal distribution for yearly # immigrants
+logN_Imm <- TRUE
+#logN_Imm <- FALSE
 
 #*********************#
 # 1) DATA PREPARATION #
@@ -277,7 +279,8 @@ IPM.constants <- list(
   uLim.N = uLim.N,
   uLim.Imm = uLim.Imm,
   maxPups = maxPups,
-  nrDens_unknown = nrDens_unknown)
+  nrDens_unknown = nrDens_unknown,
+  logN_Imm = logN_Imm)
 
 
 input.data <- list(IPM.data = IPM.data,
@@ -331,7 +334,7 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_ImmT_tNormal.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_ImmT_logNormal.rds") 
 
 MCMCvis::MCMCtrace(IPM.out)
 
