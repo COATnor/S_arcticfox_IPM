@@ -304,10 +304,10 @@ model.setup <- setupModel(modelCode = arcticfox.code,
                           nim.data = input.data$IPM.data, 
                           nim.constants = input.data$IPM.constants, 
                           z_inits = input.data.old$initsCH.CMR,
-                          minN1 = c(600, 50, 50, 50, 50), # Not in use
-                          maxN1 = c(800, 400, 400, 400, 400), # Not in use
-                          minImm = 50, # Not in use
-                          maxImm = 600, # Not in use
+                          minN1 = c(100, 50, 50, 50, 50), 
+                          maxN1 = rep(uLim.N, Amax), 
+                          minImm = 50, 
+                          maxImm = 100,
                           testRun = testRun,
                           initVals.seed = mySeed)
 
@@ -331,7 +331,7 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_fullInit.rds") 
 
 MCMCvis::MCMCtrace(IPM.out)
 
@@ -350,6 +350,16 @@ compareModels(Amax = Amax,
                               "New setup"), 
               model.versions = c("old", "new"),
               plotFolder = "Plots/Comp_newSetup")
+
+## Full initialization
+compareModels(Amax = Amax, 
+              Tmax = Tmax, 
+              minYear = minYear, 
+              post.filepaths = c("ArcticFoxIPM_newSetup.rds",
+                                 "ArcticFoxIPM_newSetup_fullInit.rds"), 
+              model.names = c("Sparsely initialized", 
+                              "Fully initialized"), 
+              plotFolder = "Plots/Comp_fullInit")
 
 
 ###########################################

@@ -3,7 +3,7 @@ simulateInitVals_original <- function(z_inits, Tmax, Amax){
   initVals <- list(
     #z = IPM.data$initsCH.CMR, 
     z = z_inits,
-    Mu.mH = c(runif(1, 0.1, 0.2), rep(runif(1, 0.1, 0.2), Amax -1)),
+    Mu.mH = c(runif(1, 0.1, 0.2), rep(runif(1, 0.1, 0.2), Amax - 1)),
     Mu.mO = c(runif(1, 1.1, 1.3), rep(runif(1, 0.4, 0.6), Amax - 1)),
     betaHP.mH = runif(1, -0.2, 0.2),
     betaRC.mO = runif(1, -0.2, 0),

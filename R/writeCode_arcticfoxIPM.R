@@ -47,7 +47,7 @@ writeCode_arcticfoxIPM <- function(){
         B[a, t] ~ dbin(Psi[a, t], N[a, t])
         
         # Litter Size (in utero): Number of pups produced by females of age class a
-        L[a, t] ~ dpois(B[a, t]*rho[a, t]*0.5)
+        L[a, t] ~ dpois(B[a, t] * rho[a, t] * 0.5)
         
         # Number Recruits: Number of pups surviving to emerge from the den
         R[a, t] ~ dbin(S0[t], L[a, t])

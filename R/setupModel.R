@@ -56,13 +56,14 @@ setupModel <- function(modelCode,
   set.seed(initVals.seed)
   initVals <- list()
   for(c in 1:nchains){
-    # initVals[[c]] <- simulateInitVals(nim.data = nim.data, 
-    #                                   nim.constants = nim.constants, 
-    #                                   minN1 = minN1, maxN1 = maxN1, 
-    #                                   minImm = minImm, maxImm = maxImm)
-    initVals[[c]] <- simulateInitVals_original(z_inits = z_inits,
-                                               Tmax = nim.constants$Tmax,
-                                               Amax = nim.constants$Amax)
+    initVals[[c]] <- simulateInitVals(nim.data = nim.data,
+                                      nim.constants = nim.constants,
+                                      z_inits = z_inits,
+                                      minN1 = minN1, maxN1 = maxN1,
+                                      minImm = minImm, maxImm = maxImm)
+    # initVals[[c]] <- simulateInitVals_original(z_inits = z_inits,
+    #                                            Tmax = nim.constants$Tmax,
+    #                                            Amax = nim.constants$Amax)
   }
   
   ## Adjust MCMC parameters if doing a test run
