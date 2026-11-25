@@ -4,7 +4,7 @@ makeCHs_fromLongitudinal <- function(data, session_name, id_name, state_name, ag
   
   Ncapture <- nrow(data)  
   Nanimal <- length(unique(data[, id_name]))  
-  occasion <- data[, session_name] - min(data[, session_name]) + 1
+  occasion <- data[, session_name]
   
   msCH <- matrix(0, Nanimal, max(occasion))
   ageCH <- matrix(0, Nanimal, max(occasion))

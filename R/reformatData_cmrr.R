@@ -9,13 +9,30 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
          Support for earlier data will be added later.")
   }
   
-  ## Drop observations outside the focal period (if necessary)
+  ## Correct year using Date where available, and filter to analysis period
   cmrr.data.raw <- cmrr.data.raw %>%
-    dplyr::mutate(YearInteger = as.integer(sub(".*-", "", Year))) %>%
+    dplyr::mutate(
+      Year = dplyr::if_else(!is.na(Date),
+                            format(Date, "%Y"), Year),
+      YearInteger = as.integer(sub(".*-", "", Year))
+    ) %>%
     dplyr::filter(dplyr::between(YearInteger, minYear, maxYear))
   
-  # TODO: I have to recode the Session variables because it currently sets 1997 = 4,
-  # which is neither consistent with the IPM not robust. 
+  ## Recode CMRR sessions relative to the first year in the IPM
+  cmrr.data.raw <- cmrr.data.raw %>%
+    dplyr::mutate(
+      MonthInteger = as.integer(Month),
+      SessionYear = dplyr::case_when(
+        !is.na(MonthInteger) & Event != "recovery" ~ YearInteger,
+        !is.na(MonthInteger) & Event == "recovery" & MonthInteger <= 5 ~ YearInteger,
+        !is.na(MonthInteger) & Event == "recovery" & MonthInteger >= 6 ~ YearInteger + 1,
+        is.na(MonthInteger) & grepl("^[0-9]{4}-[0-9]{4}$", Year) ~ YearInteger,
+        is.na(MonthInteger) & stringr::str_detect(Session_CMRR_comment, stringr::fixed("+ 1 recovery")) ~ as.numeric(Session_CMRR_adj) - 4 + 1997,
+        is.na(MonthInteger) & stringr::str_detect(Session_CMRR_comment, stringr::fixed("from NEEs comment")) ~ Session_CMRR_adj - 4 + 1997,
+        TRUE ~ YearInteger
+      ),
+      Session_IPM = SessionYear - minYear + 1
+    )
   
   ## Remove NA events and recode events as states
   # alive (marking/recapture) = 1
@@ -50,9 +67,23 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   fox <- fox %>%
     dplyr::filter(IPM_core_area == 1)
   
-  ## Remove within-session recaptures (keep only one recapture per year)
-  fox <- fox %>% 
-    dplyr::filter(!is.na(Session_CMRR_adj))
+  ## Retain one event per individual and session
+  fox <- fox %>%
+    dplyr::mutate(
+      EventPriority = dplyr::case_when(
+        Event == "marking" ~ 1,
+        Event == "recovery" ~ 2,
+        Event == "recapture" ~ 3,
+        Event == "resighting" ~ 4,
+        Event == "telemetry" ~ 5,
+        Event == "last telemetry" ~ 6
+      )
+    ) %>%
+    dplyr::group_by(Tag_ID, Session_IPM) %>%
+    dplyr::arrange(EventPriority, Date, .by_group = TRUE) %>%
+    dplyr::slice_head(n = 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-EventPriority)
   
   ## Assign an integer ID for each individual
   indIDs <- data.frame(Tag_ID = unique(fox$Tag_ID), no = 1:length(unique(fox$Tag_ID)))
@@ -65,7 +96,7 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   
   ## Transform longitudinal data to multistate capture histories
   CH.data <- makeCHs_fromLongitudinal(data = fox, 
-                                      session_name = "Session_CMRR_adj", 
+                                      session_name = "Session_IPM", 
                                       id_name = "no", 
                                       state_name = "state", 
                                       age_name = "lifestage")
