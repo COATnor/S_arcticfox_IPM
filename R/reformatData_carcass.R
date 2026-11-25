@@ -115,17 +115,17 @@ reformatData_carcass <- function (Amax, minYear, maxYear,
   ## Select relevant columns for #placental scars dataset (P1)
   P1.data <- placScar.data %>%
     dplyr::filter(Placental_scar > 0) %>%
-    dplyr::select(Placental_scar, Age, Session, Core_area) %>%
+    dplyr::select(Placental_scar, AgeClass, Session, Core_area) %>%
     dplyr::rename(P1 = Placental_scar, 
-                  P1_age = Age,
+                  P1_age = AgeClass,
                   P1_year = Session,
                   P1_core = Core_area)
   
   ## Select relevant columns for reproduction yes/no dataset (P2)
   P2.data <- placScar.data %>%
-    dplyr::select(Rep, Age, Session, Core_area) %>%
+    dplyr::select(Rep, AgeClass, Session, Core_area) %>%
     dplyr::rename(P2 = Rep, 
-                  P2_age = Age,
+                  P2_age = AgeClass,
                   P2_year = Session,
                   P2_core = Core_area)
   
