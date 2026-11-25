@@ -309,7 +309,7 @@ input.data.old <- list(IPM.data = IPM.data.old,
 model.setup <- setupModel(modelCode = arcticfox.code, 
                           nim.data = input.data$IPM.data, 
                           nim.constants = input.data$IPM.constants, 
-                          z_inits = input.data.old$initsCH.CMR,
+                          z_inits = cmrr.data$BinitsCH,
                           minN1 = c(100, 50, 50, 50, 50), 
                           maxN1 = rep(uLim.N, Amax), 
                           minImm = 50, 
@@ -337,7 +337,7 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_ImmT_logNormal.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_localData.rds") 
 
 MCMCvis::MCMCtrace(IPM.out)
 
@@ -388,6 +388,16 @@ compareModels(Amax = Amax,
               model.names = c("tNormal-Poisson (original)", 
                               "tNormal-round"), 
               plotFolder = "Plots/Comp_ImmModel2")
+
+## Locally formatted data
+compareModels(Amax = Amax, 
+              Tmax = Tmax, 
+              minYear = minYear, 
+              post.filepaths = c("ArcticFoxIPM_newSetup_ImmT_tNormal2.rds",
+                                 "ArcticFoxIPM_newSetup_localData.rds"), 
+              model.names = c("Original input data", 
+                              "Reassembled input data"), 
+              plotFolder = "Plots/Comp_InputData")
 
 
 ###########################################
