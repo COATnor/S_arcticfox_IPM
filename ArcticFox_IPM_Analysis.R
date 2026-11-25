@@ -65,8 +65,8 @@ testRun <- TRUE
 ## Set "switches" for running different model versions
 
 ## Lognormal vs. truncated normal distribution for yearly # immigrants
-logN_Imm <- TRUE
-#logN_Imm <- FALSE
+# logN_Imm <- TRUE
+logN_Imm <- FALSE
 
 #*********************#
 # 1) DATA PREPARATION #
@@ -363,6 +363,28 @@ compareModels(Amax = Amax,
               model.names = c("Sparsely initialized", 
                               "Fully initialized"), 
               plotFolder = "Plots/Comp_fullInit")
+
+## Full initialization
+compareModels(Amax = Amax, 
+              Tmax = Tmax, 
+              minYear = minYear, 
+              post.filepaths = c("ArcticFoxIPM_newSetup_fullInit.rds",
+                                 "ArcticFoxIPM_newSetup_ImmT_tNormal.rds",
+                                 "ArcticFoxIPM_newSetup_ImmT_logNormal.rds"), 
+              model.names = c("Normal (original)", 
+                              "0-truncated Normal",
+                              "LogNormal"), 
+              plotFolder = "Plots/Comp_ImmModel")
+
+## Stochasticity layers in immigration model
+compareModels(Amax = Amax, 
+              Tmax = Tmax, 
+              minYear = minYear, 
+              post.filepaths = c("ArcticFoxIPM_newSetup_ImmT_tNormal.rds",
+                                 "ArcticFoxIPM_newSetup_ImmT_tNormal2.rds"), 
+              model.names = c("tNormal-Poisson (original)", 
+                              "tNormal-round"), 
+              plotFolder = "Plots/Comp_ImmModel2")
 
 
 ###########################################
