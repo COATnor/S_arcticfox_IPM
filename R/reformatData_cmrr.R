@@ -1,24 +1,15 @@
 
 reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   
-  ## Check minYear and stop if it's earlier than the defined CMRR sessions
-  if(minYear < 1990){
-    stop("minYear is < 1990. 
-         CMRR data is available for 1984-1989, but capture sessions for that time period are not defined in the data.
-         The current version of this function relies on defined capture session and therefore does not work for data before 1990.
-         Support for earlier data will be added later.")
-  }
-  
-  ## Correct year using Date where available, and filter to analysis period
+  ## Correct year using Date where available
   cmrr.data.raw <- cmrr.data.raw %>%
     dplyr::mutate(
       Year = dplyr::if_else(!is.na(Date),
                             format(Date, "%Y"), Year),
       YearInteger = as.integer(sub(".*-", "", Year))
-    ) %>%
-    dplyr::filter(dplyr::between(YearInteger, minYear, maxYear))
-  
-  ## Recode CMRR sessions relative to the first year in the IPM
+    )
+
+  ## Recode CMRR sessions relative to the first year in the IPM & filter for relevant time period
   cmrr.data.raw <- cmrr.data.raw %>%
     dplyr::mutate(
       MonthInteger = as.integer(Month),
@@ -32,7 +23,8 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
         TRUE ~ YearInteger
       ),
       Session_IPM = SessionYear - minYear + 1
-    )
+    ) %>%
+    dplyr::filter(dplyr::between(Session_IPM, 1, maxYear - minYear + 1))
   
   ## Remove NA events and recode events as states
   # alive (marking/recapture) = 1
