@@ -9,6 +9,15 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
          Support for earlier data will be added later.")
   }
   
+  ## Drop observations outside the focal period (if necessary)
+  cmrr.data.raw <- cmrr.data.raw %>%
+    dplyr::mutate(YearInteger = as.integer(sub(".*-", "", Year))) %>%
+    dplyr::filter(dplyr::between(YearInteger, minYear, maxYear))
+  
+  
+  # TODO: I have to recode the Session variables because it currently sets 1997 = 4,
+  # which is neither consistent with the IPM not robust. 
+  
   ## Remove NA events and recode events as states
   # alive (marking/recapture) = 1
   # dead from harvest = 2

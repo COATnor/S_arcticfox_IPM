@@ -70,9 +70,8 @@ assemble_inputData <- function(Amax, Tmax, minYear,
   P2 <- subset(rep.data$P2, P2_year %in% 1:Tmax)
   
   # Mark-recovery data
-  # --> Already contains only relevant years. 
-  # TODO: May want to include an explicit filter in the reformatting function to enforce this also in cases where unorthodox time periods are used. 
-  
+  # --> Already contains only relevant years (filtered in reformatting function). 
+
   # Den survey data
   # --> Already contains only relevant years (filtered in reformatting function).
   
