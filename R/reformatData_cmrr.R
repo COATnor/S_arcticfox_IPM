@@ -14,7 +14,6 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
     dplyr::mutate(YearInteger = as.integer(sub(".*-", "", Year))) %>%
     dplyr::filter(dplyr::between(YearInteger, minYear, maxYear))
   
-  
   # TODO: I have to recode the Session variables because it currently sets 1997 = 4,
   # which is neither consistent with the IPM not robust. 
   
@@ -41,11 +40,15 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   ## Assign and filter on individual's marking location
   mark.outside <- fox %>%
     dplyr::filter(Event == "marking") %>%
-    dplyr::mutate(mark_out = ifelse(Region %in% area_selection, FALSE, TRUE)) %>%
+    dplyr::mutate(mark_out = !is.na(Region) & !(Region %in% area_selection)) %>%
     dplyr::filter(mark_out)
   
   fox <- fox %>%
     dplyr::filter(!(Tag_ID %in% mark.outside$Tag_ID))
+  
+  ## Remove observations outside the core area
+  fox <- fox %>%
+    dplyr::filter(IPM_core_area == 1)
   
   ## Remove within-session recaptures (keep only one recapture per year)
   fox <- fox %>% 
