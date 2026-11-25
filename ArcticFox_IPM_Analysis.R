@@ -132,8 +132,8 @@ denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
 #------------------------------#
 
 ## Load GPS collar data
-gps.data <- readr::read_csv(gps.data.path)
-gps.metadata <- readr::read_csv(gps.metadata.path)
+# gps.data <- readr::read_csv(gps.data.path)
+# gps.metadata <- readr::read_csv(gps.metadata.path)
 
 # reformatData_gps(gps.data, gps.metadata, 
 #                  minYear, nMonths_aggregate = 1,
@@ -224,7 +224,22 @@ arcticfox.code <- writeCode_arcticfoxIPM()
 # 3b) Assemble IPM input data #
 #-----------------------------#
 
-## Load old input data
+input.data <- assemble_inputData(Amax = Amax,
+                                 Tmax = Tmax,
+                                 minYear = minYear,
+                                 AaH.data = AaH.data,
+                                 rep.data = rep.data,
+                                 cmrr.data = cmrr.data,
+                                 denS.data = denS.data,
+                                 reindeer.data = reindeer.data,
+                                 goose.data = goose.data,
+                                 seaIce.data = seaIce.data,
+                                 info.priors = info.priors,
+                                 YearInfo = YearInfo,
+                                 logN_Imm = logN_Imm,
+                                 save = TRUE)
+
+## Load old input data - for comparison
 input.data.old <- readRDS("AF_IPM_Data.rds")
 
 ## Recode life stage variable 
@@ -239,7 +254,7 @@ for(i in 1:nrow(lifestage)){
 }
 
 ## Assemble nimble data and constants
-IPM.data <- list(
+IPM.data.old <- list(
   C = input.data.old$C,
   y = input.data.old$y.CMR, 
   P1 = input.data.old$P1,
@@ -247,14 +262,13 @@ IPM.data <- list(
   NoOcc = input.data.old$NoOcc, NoMon=input.data.old$NoMon, 
   NoPups = input.data.old$NoPups, 
   RdCarcass = input.data.old$RdCarcass, 
-  WinterTemp = input.data.old$MeanWinterTemp, 
   GooseRep = input.data.old$GooseJuvProp,
   #JanJunSeaIceIsfj = input.data.old$JanJunSeaIceIsfj,
   SeaIceIsfj = input.data.old$JanJunSeaIceIsfj,
   HPeriod = c(rep(0, 12), rep(1, 11)))
 
 
-IPM.constants <- list(
+IPM.constants.old <- list(
   Amax = input.data.old$A, 
   Juv = c(1, rep(0, input.data.old$A - 1)),
   Tmax = input.data.old$Tmax, 
@@ -283,21 +297,10 @@ IPM.constants <- list(
   logN_Imm = logN_Imm)
 
 
-input.data <- list(IPM.data = IPM.data,
-                   IPM.constants = IPM.constants)
+input.data.old <- list(IPM.data = IPM.data.old,
+                       IPM.constants = IPM.constants.old)
 
-# input.data <- assemble_inputData(Amax = Amax, 
-#                                  Tmax = Tmax, 
-#                                  minYear = minYear,
-#                                  AaH.data = AaH.data,
-#                                  rep.data = rep.data,
-#                                  cmrr.data = cmrr.data,
-#                                  denS.data = denS.data,
-#                                  reindeer.data = reindeer.data,
-#                                  goose.data = goose.data,
-#                                  seaIce.data = seaIce.data,
-#                                  info.priors = info.priors,
-#                                  YearInfo = YearInfo)
+
 
 
 # 3c) Set up for model run (incl. simulating initial values) #

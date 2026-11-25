@@ -3,36 +3,16 @@
 #' @param Amax integer. Number of age classes to consider in analyses.
 #' @param Tmax integer. The number of years to consider in analyses.
 #' @param minYear integer. First year to consider in analyses.
-#' @param maxPups integer. Upper prior bound for average litter size.
-#' @param uLim.N integer. Upper prior bound for initial number of individuals per age class.
-#' @param nLevels.rCov integer. Number of levels of categorical rodent abundance to use.
-#' @param standSpec.rCov logical. If TRUE, standardises rodent numbers per species before summing 
-#' to offset catchability, If FALSE simple sums alls rodent numbers. 
-#' @param poolYrs.genData integer. Whether or not genetic immigration data is pooled across years.
-#' @param pImm.type character. Which type of individual-level data to use for immigration. 
-#' "original" = p values as output by Geneclass 2. "rescaled" = p values as output
-#' by Geneclass 2 and standardized so that the minimum immigrant probability = 0.
-#' "LL-based" = log likelihood other / log likelihood other + log likelihood Varanger. 
-#' @param uLim.Imm integer. Upper prior bound for annual number of immigrants. 
-#' @param wAaH.data a list containing a winter Age-at-Harvest matrix (C) and a vector of
-#' yearly proportions of individuals aged/included in Age-at-Harvest data (pData).
-#' @param sAaH.data a list containing a summer Age-at-Harvest matrix (C) and a vector of
-#' yearly proportions of individuals aged/included in Age-at-Harvest data (pData).
-#' @param rep.data a list containing formatted reproduction data in two data 
-#' frames: 'P1' (counts) and 'P2' (presences/absences).
-#' @param gen.data a list containing relevant data on genetically determined 
-#' probabilities of individuals being immigrants.
-#' @param pup.data a list containing data on numbers of pups observed on dens. 
-#' @param rodent.data a list containing rodent abundance data as a continuous variable (cont),
-#' and categorical variable with two (cat2) and three (cat3) levels.
-#' @param reindeer.data a list containing reindeer carcass abundance and proportion
-#' of foxes with reindeer in stomachs.
-#' @param hunter.data a dataframe containing original and scaled counts of successful 
-#' hunters per year.
-#' @param surv.priors a list of lists containing parameters to define informative priors
-#' for early survival, age-specific annual survival, and juvenile/adult natural
-#' mortality hazard rate.
-#' @param survPriorType a list containing information on prior for annual survival.
+#' @param AaH.data list containing formatted age-at-harvest data.
+#' @param rep.data list containing formatted reproduction data from obductions.
+#' @param cmrr.data list containing formatted capture-recapture-recovery data.
+#' @param denS.data list containing formatted den survey data.
+#' @param reindeer.data data frame containing reindeer carcass covariate data per year.
+#' @param goose.data data frame containing goose covariate data per year.
+#' @param seaIce.data data frame containing sea ice covariate data per year.
+#' @param info.priors list containing constants needed for setting informative priors.
+#' @param logN_Imm logical. Model toggle for immigration model.
+#' @param YearInfo data frame summarizing years in analysis and corresponding indices. 
 #' @param save logical. If TRUE, saves assembled data as an .rds file in the 
 #' working directory. Default = FALSE. 
 #'
@@ -42,15 +22,10 @@
 #' @examples
 
 assemble_inputData <- function(Amax, Tmax, minYear,
-                               AaH.data = AaH.data,
-                               rep.data = rep.data,
-                               cmrr.data = cmrr.data,
-                               denS.data = denS.data,
-                               reindeer.data = reindeer.data,
-                               goose.data = goose.data,
-                               seaIce.data = seaIce.data,
-                               info.priors = info.priors,
-                               YearInfo = YearInfo){
+                               AaH.data, rep.data, cmrr.data, denS.data,
+                               reindeer.data, goose.data, seaIce.data,
+                               info.priors, logN_Imm, YearInfo,
+                               save){
   
   ## Select relevant years from observational data
   
@@ -104,67 +79,56 @@ assemble_inputData <- function(Amax, Tmax, minYear,
   
   
   ## List all relevant data (split into data and constants as used by NIMBLE)
-  # Data
-  nim.data <- list(
-    C_w = C_w,
-    pData_w = pData_w,
-    
-    C_s = C_s,
-    pData_s = pData_s,
-    
+  IPM.data <- list(
+    C = C,
+    y = cmrr.data$rCH, 
     P1 = P1$P1,
-    
     P2 = P2$P2,
-    
-    NoPups = pup.data$NoPups,
-    
-    HarvestEffort = hunter.data$NHunters_std,
-    RodentAbundance = RodentAbundance,
-    RodentAbundance2 = RodentAbundance2,
-    RodentIndex = RodentIndex,
-    RodentIndex2 = RodentIndex2,
-    Reindeer = Reindeer
-  )
+    NoOcc = denS.data$NoOcc, 
+    NoMon = denS.data$NoMon, 
+    NoPups = denS.data$NoPups, 
+    RdCarcass = RdCarcass, 
+    GooseRep = GooseRep,
+    #JanJunSeaIceIsfj = input.data.old$JanJunSeaIceIsfj,
+    SeaIceIsfj = SeaIceIsfj,
+    HPeriod = c(rep(0, 12), rep(1, 11)))
   
-  # Constants
-  nim.constants <- list(
-    Amax = Amax,
-    Tmax = Tmax,
-    minYear = minYear,
-    
-    maxPups = maxPups,
-    uLim.N = uLim.N,
-    uLim.Imm = uLim.Imm,
-    
-    XsH = XsH,
-    sH_year = sH_year,
-    
-    P1_age = P1$age_adj,
-    P1_year = P1$RepYearIndex,
-    X1 = length(P1$P1),
-    
-    P2_age = P2$age_adj,
-    P2_year = P2$RepYearIndex,
-    X2 = length(P2$P2),
-    
-    NoPups_year = pup.data$NoPups_year,
-    X3 = pup.data$X3,
-    
-    nLevels.rCov = nLevels.rCov
-  )
+  
+  IPM.constants <- list(
+    Amax = Amax, 
+    Juv = c(1, rep(0, Amax - 1)),
+    Tmax = Tmax, 
+    TmaxC = C.end, 
+    TmaxD = denS.data$TmaxD,
+    n.occasions = ncol(cmrr.data$rCH), 
+    nind = nrow(cmrr.data$rCH), 
+    first = cmrr.data$f, 
+    #firstyear = cmrr.data$firstyear, 
+    lifestage = cmrr.data$lifestage,
+    X1 = nrow(P1),  
+    P1_age = P1$P1_age, 
+    P1_year = P1$P1_year,
+    X2 = nrow(P2), 
+    P2_age = P2$P2_age, 
+    P2_year = P2$P2_year,
+    X3 = denS.data$X3,
+    DS_year = denS.data$DS_year, 
+    k.Dens = denS.data$k.Dens,
+    pAgeSex = pAgeSex, 
+    pLoc = pLoc,
+    logN_Imm = logN_Imm)
   
   
   ## Add relevant prior information
-  nim.constants <- c(nim.constants, surv.priors$earlySurv)
-  
+  IPM.constants <- c(IPM.constants, info.priors)
   
   ## Combine data and constants in a list
-  inputData <- list(nim.data = nim.data, 
-                    nim.constants = nim.constants)
+  inputData <- list(IPM.data = IPM.data, 
+                    IPM.constants = IPM.constants)
   
   ## Save (optional) and return data
   if(save){
-    saveRDS("inputData_formatted.rds")
+    saveRDS(inputData, "inputData_formatted.rds")
   }
   
   return(inputData)
