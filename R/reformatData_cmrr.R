@@ -1,6 +1,6 @@
 
 reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
- 
+  
   ## Check minYear and stop if it's earlier than the defined CMRR sessions
   if(minYear < 1990){
     stop("minYear is < 1990. 
@@ -49,7 +49,7 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
       Event == "resighting" ~ 4,
       Event %in% c("telemetry", "last telemetry") ~ 5
     ))
-
+  
   ## Remove resighting and telemetry events
   fox <- fox %>%
     dplyr::filter(state <= 3)
@@ -112,9 +112,11 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   # (all 0's after first capture are set to 2. Entries before first capture remain 0)
   for(i in 1:dim(lifestage)[1]){
     
-    for(t in (f[i]+1):dim(lifestage)[2]){
-      if(lifestage[i,t] == 0){
-        lifestage[i,t] <- 2
+    if(f[i] < dim(lifestage)[2]){
+      for(t in (f[i]+1):dim(lifestage)[2]){
+        if(lifestage[i,t] == 0){
+          lifestage[i,t] <- 2
+        }
       }
     }
   }
@@ -133,10 +135,12 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
     # CAPTURE HISTORIES FOR ANALYSIS (MAIN DATA) - Harvest recoveries only
     rCH <- CH
     for(i in 1:dim(rCH)[1]){
-      for(t in (f[i]+1):dim(rCH)[2]){
-        if(rCH[i,t] == 1){rCH[i,t] <- 3}
-      }
-    } # --> removing recaptures
+      if(f[i] < dim(rCH)[2]){
+        for(t in (f[i]+1):dim(rCH)[2]){
+          if(rCH[i,t] == 1){rCH[i,t] <- 3}
+        }
+      } # --> removing recaptures
+    }
     
     rCH[which(rCH==2)] <- 1
     rCH[rCH%in%c(3,4,5)] <- 0 # --> removing other cause deaths/resightings/telemetry
@@ -182,8 +186,10 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
     
     # Write initial values for remaining entries (assumption: individual alive, init = 1)
     for(i in 1:dim(initsCH)[1]){
-      for(t in (f[i]+1):dim(initsCH)[2]){
-        if(is.na(initsCH[i,t])){initsCH[i,t] <- 1}
+      if(f[i] < dim(initsCH)[2]){
+        for(t in (f[i]+1):dim(initsCH)[2]){
+          if(is.na(initsCH[i,t])){initsCH[i,t] <- 1}
+        }
       }
     }
     
@@ -247,5 +253,4 @@ reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   ## Return output
   return(CMRR.data.out)
   
-  }
-  
+}
