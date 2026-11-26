@@ -170,14 +170,9 @@ reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key,
                                        COATdataset.name = reindeer.dataset.name,
                                        COATdataset.version = reindeer.dataset.version)
 
-# Load old reindeer data (only 2012 onwards are on COAT data portal)
-reindeer.data.old <- readr::read_csv(reindeer.data.path)
-
 ## Reformat reindeer data
-reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
-                                          reindeer.data.old = reindeer.data.old,
-                                          prioritiseCOAT = TRUE)
-#reindeer.data <- reformatData_reindeerCov(reindeer.data.old = reindeer.data.old)
+reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw)
+
 
 ## GOOSE REPRODUCTION
 
