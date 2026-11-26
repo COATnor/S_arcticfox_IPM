@@ -45,12 +45,10 @@ COAT_key <- Sys.getenv("COAT_API")
 carcass.data.path <- c("Data/200108_carcass_trap.csv")
 denSurvey.data.path <- c("Data/200214_DenSurvey.csv")
 cmrr.data.path <- c("Data/SvalbardArcticFox_CaptureRecapture_1984-2016.csv")
-gps.data.path <- c("Data/Survival_GPS.csv")
-gps.metadata.path <- c("Data/Metadata_Survival_GPS.csv")
+#gps.data.path <- c("Data/Survival_GPS.csv")
+#gps.metadata.path <- c("Data/Metadata_Survival_GPS.csv")
 
-reindeer.data.path <- c("Data/SvalbardTerr_Covariates.csv")
-goose.data.path <- c("Data/SvalbardTerr_Covariates.csv")
-seaIce.data.path <- c("Data/isfjorden_1966-2019.csv")
+seaIce.data.path <- c("Data/Sea_ice_coverage_Svalbard_foxes_habitat_1997-2024/Areal_combined_1997-01-01_2024-06-19.csv")
 
 
 ## Source all functions in "R" folder
@@ -182,11 +180,8 @@ goose.data.raw <- downloadData_COAT(COAT_key = COAT_key,
                                     COATdataset.name = goose.dataset.name,
                                     COATdataset.version = goose.dataset.version)
 
-# Load goose data from file
-goose.data.ipm <- readr::read_csv(goose.data.path)
-
 # Reformat goose data
-goose.data <- reformatData_gooseCov(goose.data.ipm = goose.data.ipm)
+goose.data <- reformatData_gooseCov(goose.data.raw = goose.data.raw)
 
 
 ## SEA ICE AVAILABILITY
