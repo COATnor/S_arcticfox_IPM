@@ -337,7 +337,7 @@ IPM.out <- nimbleMCMC(code = model.setup$modelCode,
 Sys.time() - t1
 
 
-saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_localData.rds") 
+saveRDS(IPM.out, file = "ArcticFoxIPM_newSetup_localData2.rds") 
 
 MCMCvis::MCMCtrace(IPM.out)
 
@@ -394,9 +394,11 @@ compareModels(Amax = Amax,
               Tmax = Tmax, 
               minYear = minYear, 
               post.filepaths = c("ArcticFoxIPM_newSetup_ImmT_tNormal2.rds",
-                                 "ArcticFoxIPM_newSetup_localData.rds"), 
+                                 "ArcticFoxIPM_newSetup_localData.rds",
+                                 "ArcticFoxIPM_newSetup_localData2.rds"), 
               model.names = c("Original input data", 
-                              "Reassembled input data"), 
+                              "Reassembled input data",
+                              "Reassembled input data, CMR fix"), 
               plotFolder = "Plots/Comp_InputData")
 
 
