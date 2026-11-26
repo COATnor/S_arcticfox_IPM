@@ -119,6 +119,12 @@ rep.data <- list(P1 = carcass.data$P1.data,
 # 1d) Mark-recapture recovery data #
 #----------------------------------#
 
+# Download den survey from COAT data portal
+cmrr.data.raw <- downloadData_COAT(COAT_key = COAT_key,
+                                   COAT_module = "arctic-fox-module",
+                                   COATdataset.name = cmrr.dataset.name,
+                                   COATdataset.version = cmrr.dataset.version)
+
 ## Load CMRR data
 cmrr.data.raw <- readr::read_csv(cmrr.data.path)
 
@@ -131,6 +137,11 @@ cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
 # 1e) Den survey data #
 #---------------------#
 
+# Download den survey from COAT data portal
+denS.data.raw <- downloadData_COAT(COAT_key = COAT_key,
+                                       COAT_module = "arctic-fox-module",
+                                       COATdataset.name = denSurvey.dataset.name,
+                                       COATdataset.version = denSurvey.dataset.version)
 ## Prepare den survey data
 denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
                               minYear = minYear,
@@ -154,29 +165,27 @@ denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
 ## REINDEER CARCASSES
 
 # Download reindeer data from COAT data portal
-# reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-#                                        COAT_module = "ungulate-module",
-#                                        COATdataset.name = reindeer.dataset.name,
-#                                        COATdataset.version = reindeer.dataset.version)
-# --> Currently not working due to an issue connecting to COAT data portal
+reindeer.data.raw <- downloadData_COAT(COAT_key = COAT_key,
+                                       COAT_module = "ungulate-module",
+                                       COATdataset.name = reindeer.dataset.name,
+                                       COATdataset.version = reindeer.dataset.version)
 
 # Load old reindeer data (only 2012 onwards are on COAT data portal)
 reindeer.data.old <- readr::read_csv(reindeer.data.path)
 
 ## Reformat reindeer data
-# reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
-#                                           reindeer.data.old = reindeer.data.old,
-#                                           prioritiseCOAT = TRUE)
-reindeer.data <- reformatData_reindeerCov(reindeer.data.old = reindeer.data.old)
+reindeer.data <- reformatData_reindeerCov(reindeer.data.raw = reindeer.data.raw,
+                                          reindeer.data.old = reindeer.data.old,
+                                          prioritiseCOAT = TRUE)
+#reindeer.data <- reformatData_reindeerCov(reindeer.data.old = reindeer.data.old)
 
 ## GOOSE REPRODUCTION
 
 # Download goose data from COAT data portal
-# goose.data.raw <- downloadData_COAT(COAT_key = COAT_key, 
-#                                     COAT_module = "goose-module",
-#                                     COATdataset.name = goose.dataset.name,
-#                                     COATdataset.version = goose.dataset.version)
-# --> Not currently usable because information about year is not preserved in collated dataset
+goose.data.raw <- downloadData_COAT(COAT_key = COAT_key,
+                                    COAT_module = "goose-module",
+                                    COATdataset.name = goose.dataset.name,
+                                    COATdataset.version = goose.dataset.version)
 
 # Load goose data from file
 goose.data.ipm <- readr::read_csv(goose.data.path)
