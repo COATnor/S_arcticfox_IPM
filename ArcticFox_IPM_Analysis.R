@@ -24,10 +24,19 @@ minYear <- 1997 # First year to consider
 area_selection <- "Advent-/Sassendalen" # Areas to consider
 
 ## Set COAT dataset names, versions, and directories, and access
-reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer_v6"
+carcass.dataset.name <- "s_arctic_fox_carcass_examination"
+carcass.dataset.version <- 1
+
+denSurvey.dataset.name <- "s_arcticfox_reproduction_svalbard"
+denSurvey.dataset.version <- 2
+
+cmrr.dataset.name <- "s_arcticfox_capturerecapture"
+cmrr.dataset.version <- 1
+
+reindeer.dataset.name <-"s_ungulates_carcasses_adventdalen_summer"
 reindeer.dataset.version <- 6
 
-goose.dataset.name <-"s_geese_nest_nestfate_pinkfootedgoose_v1"
+goose.dataset.name <-"s_geese_nest_nestfate_pinkfootedgoose"
 goose.dataset.version <- 1
 
 COAT_key <- Sys.getenv("COAT_API")
