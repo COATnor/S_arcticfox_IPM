@@ -52,9 +52,14 @@ assemble_inputData <- function(Amax, Tmax, minYear,
   
   
   ## Select relevant environmental covariates (incl. time periods)
-  RdCarcass_orig <- subset(reindeer.data, year %in% minYear:maxYear)$reindeer_carcass
-  GooseRep_orig <- subset(goose.data, year %in% minYear:maxYear)$prop_goose_juv
-  SeaIceIsfj_orig <- subset(seaIce.data, year %in% minYear:maxYear)$IFSI.meanJanJun
+  cov.data <- data.frame(year = minYear:maxYear) %>%
+    dplyr::left_join(reindeer.data, by = "year") %>%
+    dplyr::left_join(goose.data, by = "year") %>%
+    dplyr::left_join(seaIce.data, by = "year")
+  
+  RdCarcass_orig <- cov.data$reindeer_carcass
+  GooseRep_orig <- cov.data$nest_success
+  SeaIceIsfj_orig <- cov.data$IFSI.meanJanJun
   
   
   ## Detrend and scale environmental covariates
