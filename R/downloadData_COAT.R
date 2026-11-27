@@ -95,7 +95,7 @@ downloadData_COAT <- function(COAT_key, COAT_module,
     
     ## download data
     coat_dat <- download_coat_data(name = COATdataset.name2, # write here name of the dataset (choose from the list above)
-                                   filenames = filenames[!grepl("readme|aux|coordinates", filenames)], # names of the files that should be downloaded, e.g. all data files (without readme, aux and coordinate file)
+                                   filenames = filenames[!grepl("readme|ReadMe|aux|coordinates", filenames)], # names of the files that should be downloaded, e.g. all data files (without readme, aux and coordinate file)
                                    store = "session", #"session" for importing the data in the current R session, "disk" for saving the data on your computer
                                    out.dir = NA) # if store = "disk", you have to specify the path to a folder where the data should be stored
     
