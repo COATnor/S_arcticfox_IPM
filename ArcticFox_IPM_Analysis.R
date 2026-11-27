@@ -2,7 +2,7 @@ library(ggplot2)
 library(nimble)
 library(reshape2)
 library(remotes)
-library(ckanr)
+library(ckanr) # Note: dev version needed (> 0.9.)
 library(purrr)
 library(dplyr)
 library(patchwork)
@@ -137,9 +137,9 @@ cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
 
 # Download den survey from COAT data portal
 denS.data.raw <- downloadData_COAT(COAT_key = COAT_key,
-                                       COAT_module = "arctic-fox-module",
-                                       COATdataset.name = denSurvey.dataset.name,
-                                       COATdataset.version = denSurvey.dataset.version)
+                                   COAT_module = "arctic-fox-module",
+                                   COATdataset.name = denSurvey.dataset.name,
+                                   COATdataset.version = denSurvey.dataset.version)
 ## Prepare den survey data
 denS.data <- wrangleData_denS(datapath = denSurvey.data.path,
                               minYear = minYear,
