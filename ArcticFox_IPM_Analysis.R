@@ -123,9 +123,6 @@ cmrr.data.raw <- downloadData_COAT(COAT_key = COAT_key,
                                    COATdataset.name = cmrr.dataset.name,
                                    COATdataset.version = cmrr.dataset.version)
 
-## Load CMRR data
-cmrr.data.raw <- readr::read_csv(cmrr.data.path)
-
 ## Prepare CMRR data
 cmrr.data <- reformatData_cmrr(cmrr.data.raw = cmrr.data.raw,
                                minYear = minYear, maxYear = minYear + Tmax - 1,

@@ -1,9 +1,26 @@
 
 reformatData_cmrr <- function(cmrr.data.raw, minYear, maxYear, area_selection){
   
+  ## Rename columns from COAT database download
+  cmrr.data.raw <- cmrr.data.raw[[1]] %>%
+    dplyr::rename(
+      Date = t_date,
+      Year = t_year,
+      Month = t_month,
+      Event = v_capture_type,
+      Session_CMRR_comment = t_session_cmrr_comment,
+      Session_CMRR_adj = t_session_cmrr_adj,
+      Death_cause = v_cause_of_death,
+      Region = sn_locality,
+      Tag_ID = v_individual_id,
+      IPM_core_area = v_core_area,
+      Year_first = v_age_class
+    )
+  
   ## Correct year using Date where available
   cmrr.data.raw <- cmrr.data.raw %>%
     dplyr::mutate(
+      Date = as.Date(Date, format = "%Y-%m-%d"),
       Year = dplyr::if_else(!is.na(Date),
                             format(Date, "%Y"), Year),
       YearInteger = as.integer(sub(".*-", "", Year))
